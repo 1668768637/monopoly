@@ -36,7 +36,10 @@ SOURCES += \
     GameObject.cpp \
     AbstractMap.cpp \
     AbstractPlayer.cpp \
-    OperablePlace.cpp
+    OperablePlace.cpp \
+    MapFactory.cpp \
+    Grass.cpp \
+    UndefinedMap.cpp
 
 HEADERS += \
         monopolygame.h \
@@ -51,7 +54,10 @@ HEADERS += \
     House.h \
     Bank.h \
     GameObject.h \
-    Knapsack.h
+    Knapsack.h \
+    MapFactory.h \
+    Grass.h \
+    UndefinedMap.h
 
 FORMS += \
         monopolygame.ui

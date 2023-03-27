@@ -1,5 +1,10 @@
 <RCC>
     <qresource prefix="/res">
         <file>img/road.png</file>
+        <file>img/grass.png</file>
+        <file>img/house.png</file>
+        <file>img/noneBlock.png</file>
+        <file>img/people.png</file>
+        <file>map/map.txt</file>
     </qresource>
 </RCC>

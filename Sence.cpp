@@ -4,6 +4,7 @@
 Sence::Sence()
 {
     setObjectName("Sence");
+    this->init();
 }
 
 bool Sence::init()

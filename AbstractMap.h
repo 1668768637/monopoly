@@ -7,7 +7,9 @@ class AbstractMap:public GameObjcet
 {
     Q_OBJECT
 public:
-    AbstractMap();
+    friend class MapFactory;
     virtual bool init() = 0;
+    AbstractMap();
+private:
 };
 #endif // ABSTRACTMAP_H

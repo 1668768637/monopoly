@@ -1,15 +1,15 @@
-#ifndef ROAD_H
-#define ROAD_H
+#ifndef GRASS_H
+#define GRASS_H
 #include "AbstractMap.h"
 #include "QObject"
 #include "mapfactory.h"
-class Road:public AbstractMap
+class Grass:public AbstractMap
 {
     Q_OBJECT
 public:
     bool init();
     friend class MapFactory;
 private:
-    Road();
+    Grass();
 };
-#endif // ROAD_H
+#endif // GRASS_H

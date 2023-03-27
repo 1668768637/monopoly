@@ -3,6 +3,7 @@
 House::House()
 {
     setObjectName("House");
+    this->init();
 }
 
 bool House::option()
