@@ -1,14 +1,17 @@
 #ifndef MONEY_H
 #define MONEY_H
-#include "Prop.h"
-#include "QObject"
+
+#include "prop.h"
+
 class Money:public Prop
 {
     Q_OBJECT
-private:
-    int nums;
 public:
-    Money();
-    int getNum();
+    float num;
+    Money(float num = 0.0);
+
+signals:
+    void moneyChanged();
 };
+
 #endif // MONEY_H

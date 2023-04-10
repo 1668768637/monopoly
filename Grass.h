@@ -7,7 +7,6 @@ class Grass:public AbstractMap
 {
     Q_OBJECT
 public:
-    bool init();
     friend class MapFactory;
 private:
     Grass();

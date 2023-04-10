@@ -3,4 +3,5 @@
 OperablePlace::OperablePlace()
 {
     setObjectName("OperablePlace");
+    gameWindow = monopolyGame::myWindow;
 }

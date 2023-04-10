@@ -2,10 +2,11 @@
 #define ABSTRACTPLAYER_H
 #include "GameObject.h"
 #include "QObject"
-class AbstractOlayer:public GameObjcet
+
+class AbstractPlayer:public GameObjcet
 {
     Q_OBJECT
 public:
-    AbstractOlayer();
+    AbstractPlayer();
 };
 #endif // ABSTRACTPLAYER_H

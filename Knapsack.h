@@ -2,16 +2,13 @@
 #define KNAPSACK_H
 #include "Prop.h"
 #include "QObject"
+#include <QList>
+class Prop;
 class Knapsack:public Prop
 {
     Q_OBJECT
-private:
-    Prop* contianer;
-    int totalNum;
-    int num;
 public:
     Knapsack();
-    int getTotalNum();
-    int getNum();
+    QList<Prop*> container;
 };
 #endif // KNAPSACK_H

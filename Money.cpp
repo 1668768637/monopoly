@@ -1,11 +1,6 @@
 #include "money.h"
 
-Money::Money()
+Money::Money(float num)
 {
-    setObjectName("Money");
-}
-
-int Money::getNum()
-{
-    return this->nums;
+    this->num = num;
 }

@@ -3,15 +3,21 @@
 #include "OperablePlace.h"
 #include "QObject"
 #include "mapfactory.h"
+#include "player.h"
 
 class House:public OperablePlace
 {
     Q_OBJECT
 public:
     friend class MapFactory;
-    bool option();
-    bool init();
+    Player *owner;
+    float rent;
+
 private:
     House();
+
+private slots:
+    bool showHouseInfo();
+
 };
 #endif // HOUSE_H

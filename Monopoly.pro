@@ -26,10 +26,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         monopolygame.cpp \
-    Player.cpp \
     Money.cpp \
     Knapsack.cpp \
-    Sence.cpp \
     Road.cpp \
     House.cpp \
     Bank.cpp \
@@ -39,16 +37,17 @@ SOURCES += \
     OperablePlace.cpp \
     MapFactory.cpp \
     Grass.cpp \
-    UndefinedMap.cpp
+    UndefinedMap.cpp \
+    Player.cpp \
+    land.cpp \
+    prop.cpp
 
 HEADERS += \
         monopolygame.h \
     AbstractPlayer.h \
     AbstractMap.h \
     Money.h \
-    Player.h \
     Prop.h \
-    Sence.h \
     Road.h \
     OperablePlace.h \
     House.h \
@@ -57,7 +56,9 @@ HEADERS += \
     Knapsack.h \
     MapFactory.h \
     Grass.h \
-    UndefinedMap.h
+    UndefinedMap.h \
+    Player.h \
+    land.h \
 
 FORMS += \
         monopolygame.ui

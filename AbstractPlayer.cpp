@@ -1,6 +1,6 @@
 #include "abstractplayer.h"
 
-AbstractOlayer::AbstractOlayer()
+AbstractPlayer::AbstractPlayer()
 {
     setObjectName("AbstractOlayer");
 }

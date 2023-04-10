@@ -8,6 +8,5 @@ class Bank:public OperablePlace
 public:
     Bank();
     bool option();
-    bool init();
 };
 #endif // BANK_H
