@@ -5,6 +5,7 @@
 #include "QObject"
 #include "AbstractMap.h"
 #include "player.h"
+#include <QPixmap>
 
 
 //默认相机中心
@@ -44,6 +45,7 @@ public:
 
     QPoint *camearCenter;
     QList<QList<AbstractMap*>> mapList;
+    AbstractMap* screenList[SCREEN_H_ELEMS][SCREEN_W_ELEMS];
     QList<Player*> playerList;
     QList<QLabel*> playerTitleList;
     Player* runningPlayer;
@@ -53,6 +55,9 @@ public:
     bool initUI();
     bool printMap();
     Player* nextPlayer();
+
+private:
+    bool showPlayer();
 
 public slots:
     bool moveCamera();

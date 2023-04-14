@@ -15,7 +15,6 @@
 #include <QShortcut>
 #include <QGraphicsPixmapItem>
 #include <QMessageBox>
-#include <mutex>
 #include "Grass.h"
 #include <QPushButton>
 #include "road.h"
@@ -25,6 +24,8 @@
 #include <QFont>
 #include <QtGlobal>
 #include <QTime>
+#include <QFile>
+#include <QPainter>
 
 monopolyGame* monopolyGame::myWindow = nullptr;
 
@@ -40,6 +41,14 @@ monopolyGame::monopolyGame(QWidget *parent) :
     ui->gamePannel->setGeometry(0,0,1800,969);
     ui->map->setGeometry(0,0,1800,969);
     camearCenter = new QPoint(CAMERACENTER_X,CAMERACENTER_Y);
+
+    QFile *qss = new QFile(":/res/qss/monopoly.qss");
+    if(qss->open(QFile::ReadOnly))
+    {
+        setStyleSheet(qss->readAll());
+    }
+
+
 
     initGameData();
     initGameMap();
@@ -80,7 +89,7 @@ bool monopolyGame::initGameMap()
 
 
     //从map.txt中读取相应的指定地图元素
-    QFile map(":/res/map/map.txt");
+    QFile map("./map/map.txt");
     if (!map.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         qDebug()<<"打开失败";
@@ -105,11 +114,15 @@ bool monopolyGame::initGameMap()
         for(int j = 0;j < GAMEPANNEL_COL;j++)
         {
             AbstractMap* p = MapFactory::createMap(gameMap[i][j],i,j);
+            p->setParent(ui->map);
+            p->hide();
             mapList[i].append(p);
         }
     }
 
     printMap();
+
+    map.close();
     return true;
 }
 
@@ -117,7 +130,7 @@ bool monopolyGame::initGameData()
 {
     QPoint begin;
 
-    QFile map(":/res/map/map.txt");
+    QFile map("./map/map.txt");
     if (!map.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         return false; // 如果无法打开文件，则退出
@@ -166,7 +179,7 @@ bool monopolyGame::initGameData()
                     runningUserMoney = dynamic_cast<Money*>(runningPlayer->knapsack->container.at(propNum));
                 }
             }
-            ui->gamePannel->findChild<QLabel*>("runningPlayer_money")->setText("余额：" + QString::number(runningUserMoney->num));
+            ui->gamePannel->findChild<QLabel*>("runningPlayer_moneyLab")->setText("余额：" + QString::number(runningUserMoney->num));
         });
 
 
@@ -246,16 +259,16 @@ bool monopolyGame::initGameData()
 
                 runningPlayerMoney->num -= houseList[i]->rent;
                 emit runningPlayerMoney->moneyChanged();
-                }
-            printMap();
+            }
+            showPlayer();
         });
 
 
         //绑定行走玩家发生变化事件
         connect(playerList[playerNum],&Player::playerChanged,[=](){
 
-            QLabel* lab = ui->gamePannel->findChild<QLabel*>("labRunningPlayer");
-            lab->setText("当前玩家:\n"+runningPlayer->name);
+            QLabel* lab = ui->gamePannel->findChild<QLabel*>("runningPlayerLab");
+            lab->setText(runningPlayer->name);
 
             Money *runningUserMoney;
             for(int j = 0;j < runningPlayer->knapsack->container.length();j++)
@@ -265,7 +278,7 @@ bool monopolyGame::initGameData()
                     runningUserMoney = dynamic_cast<Money*>(runningPlayer->knapsack->container.at(j));
                 }
             }
-            ui->gamePannel->findChild<QLabel*>("runningPlayer_money")->setText("余额：" + QString::number(runningUserMoney->num));
+            ui->gamePannel->findChild<QLabel*>("runningPlayer_moneyLab")->setText("余额：" + QString::number(runningUserMoney->num));
         });
     }
 
@@ -283,7 +296,7 @@ bool monopolyGame::initUI()
     QPushButton *run = new QPushButton(ui->gamePannel);
     run->setObjectName("run");
     run->setText("走一次");
-    run->move(ui->gamePannel->width()-200,ui->gamePannel->height()-100);
+    run->move(ui->gamePannel->width()-250,ui->gamePannel->height()-100);
     run->show();
     connect(run,&QPushButton::clicked,this,&playerRun);
 
@@ -291,22 +304,27 @@ bool monopolyGame::initUI()
     QPushButton *endOfTurn = new QPushButton(ui->gamePannel);
     endOfTurn->setObjectName("nextPlayer");
     endOfTurn->setText("回合结束");
-    endOfTurn->move(ui->gamePannel->width()-100,ui->gamePannel->height()-100);
+    endOfTurn->move(ui->gamePannel->width()-150,ui->gamePannel->height()-100);
     endOfTurn->show();
     connect(endOfTurn,&QPushButton::clicked,this,&monopolyGame::endOfTurn);
 
+
+    //当前玩家信息标签(groupBox)
+    QGroupBox *runningPlayerInfo = new QGroupBox(ui->gamePannel);
+    runningPlayerInfo->setObjectName("runningPlayerInfo");
+    runningPlayerInfo->setGeometry(10,10,300,200);
+
+
     //当前玩家label
-    QLabel *runningPlayerLab = new QLabel(ui->gamePannel);
-    runningPlayerLab->setStyleSheet("font-size:25px;");
-    runningPlayerLab->setObjectName("labRunningPlayer");
-    runningPlayerLab->setText("当前玩家:\n"+runningPlayer->name);
-    runningPlayerLab->move(ui->gamePannel->width()/2-runningPlayerLab->width()/2,0);
+    QLabel *runningPlayerLab = new QLabel(runningPlayerInfo);
+    runningPlayerLab->setObjectName("runningPlayerLab");
+    runningPlayerLab->setText(runningPlayer->name);
+    runningPlayerLab->move(0,0);
     runningPlayerLab->show();
 
     //余额label
-    QLabel *runningPlayer_moneyLab = new QLabel(ui->gamePannel);
-    runningPlayer_moneyLab->setObjectName("runningPlayer_money");
-    runningPlayer_moneyLab->setStyleSheet("font-size:30px;");
+    QLabel *runningPlayer_moneyLab = new QLabel(runningPlayerInfo);
+    runningPlayer_moneyLab->setObjectName("runningPlayer_moneyLab");
     for(int i = 0;i < runningPlayer->knapsack->container.length();i++)
     {
         if(runningPlayer->knapsack->container.at(i)->inherits("Money"))
@@ -315,24 +333,85 @@ bool monopolyGame::initUI()
             break;
         }
     }
-    runningPlayer_moneyLab->move(ui->gamePannel->width()-200,0);
+    runningPlayer_moneyLab->move(0,100);
     runningPlayer_moneyLab->show();
+
+    //背包按钮
+
+    //信息按钮
+    QPushButton *info = new QPushButton(ui->gamePannel);
+    info->setObjectName("infoBtn");
+    info->setText("?");
+    info->move(ui->gamePannel->width()-60,0);
+    connect(info,&QPushButton::clicked,[=](){
+        if(ui->gamePannel->findChild<QGroupBox*>("infoBox"))return;
+
+        QGroupBox *infoBox = new QGroupBox(ui->gamePannel);
+        int width = 300,height = 300;
+        infoBox->setGeometry(ui->gamePannel->width()/2 - width/2,ui->gamePannel->height()/2 - height/2,width,height);
+        infoBox->setObjectName("infoBox");
+
+        QLabel *infoLab = new QLabel(infoBox);
+        infoLab->move(0,0);
+        infoLab->setText("移动镜头：WASD分别对应上左下右");
+
+        QPushButton *confirm = new QPushButton(infoBox);
+        confirm->setText("确认");
+        confirm->move(infoBox->width()/2 - confirm->width()/2,infoBox->height() - confirm->height());
+        connect(confirm,&QPushButton::clicked,[=](){
+            infoBox->close();
+            delete infoLab;
+            delete confirm;
+            delete infoBox;
+        });
+
+        infoBox->show();
+    });
+    info->show();
+
     return true;
 }
 
 bool monopolyGame::printMap()
 {
     //打印地图
-    bool showPlayer = false;
+    bool showPlayerFlag = false;
     for(int i = camearCenter->y()-SCREEN_H_ELEMS/2,girdI = 0 ; i < camearCenter->y()+SCREEN_H_ELEMS/2;i++,girdI++)
     {
         for(int j = camearCenter->x() - SCREEN_W_ELEMS/2 ,girdJ = 0; j < camearCenter->x() + SCREEN_W_ELEMS/2;j++,girdJ++)
         {
             AbstractMap* p = mapList[i][j];
-            p->setParent(ui->map);
-            p->move(girdJ*36,girdI*51);
+            p->move(girdJ*ELEM_W,girdI*ELEM_H);
             p->show();
-            //渲染玩家
+        }
+    }
+
+    //渲染玩家
+    showPlayerFlag = showPlayer();
+
+    //打印玩家
+    //结束后还没有渲染玩家，说明玩家应该暂时消失
+    if(!showPlayerFlag)
+    {
+        for(int num = 0;num < this->playerList.length();num++)
+        {
+            this->playerList[num]->hide();
+            this->playerTitleList[num]->hide();
+        }
+    }
+
+    return true;
+}
+
+
+bool monopolyGame::showPlayer()
+{
+    bool showPlayerFlag = false;
+    for(int i = camearCenter->y()-SCREEN_H_ELEMS/2,girdI = 0 ; i < camearCenter->y()+SCREEN_H_ELEMS/2;i++,girdI++)
+    {
+        for(int j = camearCenter->x() - SCREEN_W_ELEMS/2 ,girdJ = 0; j < camearCenter->x() + SCREEN_W_ELEMS/2;j++,girdJ++)
+        {
+
             for(int num = 0;num < this->playerList.length();num++)
             {
                 if(this->playerList[num]->gamemapPos.x() == i && this->playerList[num]->gamemapPos.y() == j)
@@ -347,24 +426,13 @@ bool monopolyGame::printMap()
                     this->playerTitleList[num]->move(girdJ*36,girdI*51 -15);
                     this->playerTitleList[num]->show();
 
-                    showPlayer = true;
+                    showPlayerFlag = true;
                 }
             }
         }
     }
 
-    //打印玩家
-    //结束后还没有渲染玩家，说明玩家应该暂时消失
-    if(!showPlayer)
-    {
-        for(int num = 0;num < this->playerList.length();num++)
-        {
-            this->playerList[num]->hide();
-            this->playerTitleList[num]->hide();
-        }
-    }
-
-    return true;
+    return showPlayerFlag;
 }
 
 Player *monopolyGame::nextPlayer()
@@ -380,78 +448,92 @@ Player *monopolyGame::nextPlayer()
     }
 }
 
+
 bool monopolyGame::moveCamera()
 {
-    //清空layout
-    for(int i = camearCenter->y()-SCREEN_H_ELEMS/2; i < camearCenter->y()+SCREEN_H_ELEMS/2;i++)
-    {
-        for(int j = camearCenter->x() - SCREEN_W_ELEMS/2 ; j < camearCenter->x() + SCREEN_W_ELEMS/2;j++)
-        {
-            mapList[i][j]->setParent(nullptr);
-            mapList[i][j]->hide();
-        }
-    }
-
-
     QObject* sender = QObject::sender();
     QString signalName = sender->objectName();
 
+
+    QPoint point(camearCenter->x(),camearCenter->y());
     switch (signalName.at(0).unicode()) {
     case 'W':
-        camearCenter->setY(camearCenter->y()-1<10?10:camearCenter->y()-1);
+        camearCenter->setY(camearCenter->y()-1<SCREEN_H_ELEMS/2?SCREEN_H_ELEMS/2:camearCenter->y()-1);
         break;
     case 'A':
-        camearCenter->setX(camearCenter->x()-1>25?camearCenter->x()-1:25);
+        camearCenter->setX(camearCenter->x()-1>SCREEN_W_ELEMS/2?camearCenter->x()-1:SCREEN_W_ELEMS/2);
         break;
     case 'S':
-        camearCenter->setY(camearCenter->y()+1>50?50:camearCenter->y()+1);
+        camearCenter->setY(camearCenter->y()+1>GAMEPANNEL_ROW-SCREEN_H_ELEMS/2?GAMEPANNEL_ROW-SCREEN_H_ELEMS/2:camearCenter->y()+1);
         break;
     case 'D':
-        camearCenter->setX(camearCenter->x()+1<34?camearCenter->x()+1:34);
+        camearCenter->setX(camearCenter->x()+1<GAMEPANNEL_COL-SCREEN_W_ELEMS/2?camearCenter->x()+1:GAMEPANNEL_COL-SCREEN_W_ELEMS/2);
         break;
     default:
         break;
     }
-    printMap();
+
+    if(point.x()!=camearCenter->x() || point.y()!=camearCenter->y())
+    {
+        //清空原屏幕layout
+        for(int i = point.y()-SCREEN_H_ELEMS/2; i < point.y()+SCREEN_H_ELEMS/2;i++)
+        {
+            for(int j = point.x() - SCREEN_W_ELEMS/2 ; j < point.x() + SCREEN_W_ELEMS/2;j++)
+            {
+                //mapList[i][j]->setParent(nullptr);频繁的设置会占用大量cpu资源
+                mapList[i][j]->hide();
+            }
+        }
+        ui->map->show();
+
+        printMap();
+    }
     return true;
 }
 
 bool monopolyGame::playerRun()
 {
+
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
     runningPlayer->steps = qrand()%6+1;
 
     ui->gamePannel->findChild<QPushButton*>("run")->setEnabled(false);
+    int x = runningPlayer->gamemapPos.x();
+    int y = runningPlayer->gamemapPos.y();
+    Road *road = dynamic_cast<Road*>(mapList[x][y]);
 
-    while(runningPlayer->steps != 0)
+    while(runningPlayer->steps != 0 && runningPlayer->steps >= road->stepCost)
     {
-        int x = runningPlayer->gamemapPos.x();
-        int y = runningPlayer->gamemapPos.y();
-        Road *road = dynamic_cast<Road*>(mapList[x][y]);
         switch (road->direction) {
         case Road::Direct::RIGHT:
-            runningPlayer->gamemapPos.setY(y+road->stepCost);
+            runningPlayer->gamemapPos.setY(y+1);
             break;
         case Road::Direct::LEFT:
-            runningPlayer->gamemapPos.setY(y-road->stepCost);
+            runningPlayer->gamemapPos.setY(y-1);
             break;
         case Road::Direct::UP:
-            runningPlayer->gamemapPos.setX(x-road->stepCost);
+            runningPlayer->gamemapPos.setX(x-1);
             break;
         case Road::Direct::DOWN:
-            runningPlayer->gamemapPos.setX(x+road->stepCost);
+            runningPlayer->gamemapPos.setX(x+1);
             break;
         default:
             break;
         }
-
         runningPlayer->steps -=road->stepCost;
+
+        x = runningPlayer->gamemapPos.x();
+        y = runningPlayer->gamemapPos.y();
+        road = dynamic_cast<Road*>(mapList[x][y]);
     }
+
+    runningPlayer->steps = 0;
 
     //发出玩家行走完毕信号
     emit runningPlayer->playerRun();
     return true;
 }
+
 
 bool monopolyGame::endOfTurn()
 {

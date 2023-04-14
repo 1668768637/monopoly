@@ -21,3 +21,4 @@ Player::Player(QPoint begin)
 
     this->knapsack->container.append(new Money(INIT_MONEY));
 }
+

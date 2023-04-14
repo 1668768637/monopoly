@@ -123,6 +123,7 @@ bool Land::showBuyHouseUI()
 
                 //替换土地为房子
                 AbstractMap *house = MapFactory::createMap(19,senderPos.x(),senderPos.y());
+                house->setParent(gameWindow->ui->map);
                 gameWindow->mapList[senderPos.x()].replace(senderPos.y(),house);
                 emit mapChanged();
 
