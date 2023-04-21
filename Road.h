@@ -4,14 +4,13 @@
 #include "QObject"
 #include "mapfactory.h"
 
-
 class Road:public AbstractMap
 {
     Q_OBJECT
 public:
     friend class MapFactory;
 
-    enum class Direct{LEFT,RIGHT,UP,DOWN};
+    enum class Direct{LEFT=1004,RIGHT,UP,DOWN};
     Direct direction;
     int stepCost;
 

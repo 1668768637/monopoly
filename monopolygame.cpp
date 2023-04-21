@@ -26,6 +26,8 @@
 #include <QTime>
 #include <QFile>
 #include <QPainter>
+#include <QPropertyAnimation>
+#include <QEasingCurve>
 
 monopolyGame* monopolyGame::myWindow = nullptr;
 
@@ -50,6 +52,8 @@ monopolyGame::monopolyGame(QWidget *parent) :
 
 
 
+    state=gameState::Ready;
+
     initGameData();
     initGameMap();
     initUI();
@@ -67,6 +71,8 @@ monopolyGame::monopolyGame(QWidget *parent) :
     QShortcut *shortcut_D = new QShortcut(QKeySequence(Qt::Key_D), this);
     shortcut_D->setObjectName("D");
     connect(shortcut_D, &QShortcut::activated, this, moveCamera);
+
+    state=gameState::Running;
 
 }
 
@@ -92,6 +98,7 @@ bool monopolyGame::initGameMap()
     QFile map("./map/map.txt");
     if (!map.open(QIODevice::ReadOnly | QIODevice::Text))
     {
+        QMessageBox::information(this,"游戏文件错误","似乎没有找到相应的地图文件。");
         qDebug()<<"打开失败";
         return false; // 如果无法打开文件，则退出
     }
@@ -148,6 +155,10 @@ bool monopolyGame::initGameData()
         {
             begin.setX(strList[0].toInt());
             begin.setY(strList[1].toInt());
+        }
+        else
+        {
+            QMessageBox::information(this,"地图加载失败","地图起点加载失败，请检查地图格式。");
         }
     }
 
@@ -256,11 +267,9 @@ bool monopolyGame::initGameData()
                         runningPlayerMoney = dynamic_cast<Money*>(runningPlayer->knapsack->container.at(j));
                     }
                 }
-
                 runningPlayerMoney->num -= houseList[i]->rent;
                 emit runningPlayerMoney->moneyChanged();
             }
-            showPlayer();
         });
 
 
@@ -353,7 +362,7 @@ bool monopolyGame::initUI()
 
         QLabel *infoLab = new QLabel(infoBox);
         infoLab->move(0,0);
-        infoLab->setText("移动镜头：WASD分别对应上左下右");
+        infoLab->setText("移动镜头：WASD分别对应上左下右\n当前镜头大小和地图大小一致，所以镜头并不会移动。");
 
         QPushButton *confirm = new QPushButton(infoBox);
         confirm->setText("确认");
@@ -407,6 +416,7 @@ bool monopolyGame::printMap()
 bool monopolyGame::showPlayer()
 {
     bool showPlayerFlag = false;
+    //遍历屏幕寻找玩家坐标
     for(int i = camearCenter->y()-SCREEN_H_ELEMS/2,girdI = 0 ; i < camearCenter->y()+SCREEN_H_ELEMS/2;i++,girdI++)
     {
         for(int j = camearCenter->x() - SCREEN_W_ELEMS/2 ,girdJ = 0; j < camearCenter->x() + SCREEN_W_ELEMS/2;j++,girdJ++)
@@ -418,13 +428,24 @@ bool monopolyGame::showPlayer()
                 {
                     //玩家图片
                     this->playerList[num]->setParent(ui->gamePannel);
-                    this->playerList[num]->move(girdJ*36,girdI*51);
-                    this->playerList[num]->show();
+                    //玩家动画
+                    QPropertyAnimation* playerAnimation = new QPropertyAnimation(playerList[num],"geometry");
+                    playerAnimation->setDuration(800);//动画时间
+                    playerAnimation->setStartValue(playerList[num]->geometry());
+                    playerAnimation->setEndValue(QRect(girdJ*36,girdI*51,playerList[num]->geometry().width(),playerList[num]->geometry().height()));
+                    playerAnimation->setEasingCurve(QEasingCurve::Linear);
+                    playerAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+
 
                     //玩家头衔
                     this->playerTitleList[num]->setParent(ui->gamePannel);
-                    this->playerTitleList[num]->move(girdJ*36,girdI*51 -15);
-                    this->playerTitleList[num]->show();
+                    //头衔动画
+                    QPropertyAnimation* playerTitleAnimation = new QPropertyAnimation(playerTitleList[num],"geometry");
+                    playerTitleAnimation->setDuration(800);//动画时间
+                    playerTitleAnimation->setStartValue(playerTitleList[num]->geometry());
+                    playerTitleAnimation->setEndValue(QRect(girdJ*36,girdI*51-260,playerTitleList[num]->geometry().width(),playerTitleList[num]->geometry().height()));
+                    playerTitleAnimation->setEasingCurve(QEasingCurve::Linear);
+                    playerTitleAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 
                     showPlayerFlag = true;
                 }
@@ -453,7 +474,6 @@ bool monopolyGame::moveCamera()
 {
     QObject* sender = QObject::sender();
     QString signalName = sender->objectName();
-
 
     QPoint point(camearCenter->x(),camearCenter->y());
     switch (signalName.at(0).unicode()) {
@@ -498,39 +518,50 @@ bool monopolyGame::playerRun()
     runningPlayer->steps = qrand()%6+1;
 
     ui->gamePannel->findChild<QPushButton*>("run")->setEnabled(false);
-    int x = runningPlayer->gamemapPos.x();
-    int y = runningPlayer->gamemapPos.y();
-    Road *road = dynamic_cast<Road*>(mapList[x][y]);
 
-    while(runningPlayer->steps != 0 && runningPlayer->steps >= road->stepCost)
-    {
-        switch (road->direction) {
-        case Road::Direct::RIGHT:
-            runningPlayer->gamemapPos.setY(y+1);
-            break;
-        case Road::Direct::LEFT:
-            runningPlayer->gamemapPos.setY(y-1);
-            break;
-        case Road::Direct::UP:
-            runningPlayer->gamemapPos.setX(x-1);
-            break;
-        case Road::Direct::DOWN:
-            runningPlayer->gamemapPos.setX(x+1);
-            break;
-        default:
-            break;
-        }
-        runningPlayer->steps -=road->stepCost;
+    // 定义一个定时器，用于延时显示每一步的效果
+        QTimer* timer = new QTimer(this);
+        connect(timer, &QTimer::timeout, this, [=]() {
+            int x = runningPlayer->gamemapPos.x();
+            int y = runningPlayer->gamemapPos.y();
+            Road *road = dynamic_cast<Road*>(mapList[x][y]);
+            if(runningPlayer->steps != 0 && runningPlayer->steps >= road->stepCost)
+            {
+                switch (road->direction) {
+                case Road::Direct::RIGHT:
+                    runningPlayer->gamemapPos.setY(y+1);
+                    break;
+                case Road::Direct::LEFT:
+                    runningPlayer->gamemapPos.setY(y-1);
+                    break;
+                case Road::Direct::UP:
+                    runningPlayer->gamemapPos.setX(x-1);
+                    break;
+                case Road::Direct::DOWN:
+                    runningPlayer->gamemapPos.setX(x+1);
+                    break;
+                default:
+                    break;
+                }
+                runningPlayer->steps -=road->stepCost;
 
-        x = runningPlayer->gamemapPos.x();
-        y = runningPlayer->gamemapPos.y();
-        road = dynamic_cast<Road*>(mapList[x][y]);
-    }
+                showPlayer();
 
-    runningPlayer->steps = 0;
+            }
+            else
+            {
+             //玩家步数不足以走下一步或者已经走完
+                runningPlayer->steps = 0;
+                emit runningPlayer->playerRun();
+                timer->stop();
+                delete timer;
+            }
+        });
 
-    //发出玩家行走完毕信号
-    emit runningPlayer->playerRun();
+    // 设置定时器的时间间隔，控制每一步的延时
+    timer->setInterval(800); // 设置延时为1秒
+    timer->start();
+
     return true;
 }
 

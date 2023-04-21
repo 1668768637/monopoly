@@ -8,10 +8,6 @@
 #include <QPixmap>
 
 
-//默认相机中心
-#define CAMERACENTER_X 28
-#define CAMERACENTER_Y 10
-
 //元素的像素值
 #define ELEM_W 36
 #define ELEM_H 51
@@ -21,8 +17,12 @@
 #define SCREEN_H_ELEMS 20
 
 //地图大小
-#define GAMEPANNEL_ROW 60
-#define GAMEPANNEL_COL 60
+#define GAMEPANNEL_ROW 20
+#define GAMEPANNEL_COL 50
+
+//默认相机中心
+#define CAMERACENTER_X GAMEPANNEL_COL/2
+#define CAMERACENTER_Y GAMEPANNEL_ROW/2
 
 //游戏人数
 #define PLAYER_NUM 2
@@ -31,6 +31,8 @@ class Player;
 namespace Ui {
 class monopolyGame;
 }
+
+enum class gameState{Ready=1001,Running,End};
 
 class monopolyGame : public QWidget
 {
@@ -49,6 +51,7 @@ public:
     QList<Player*> playerList;
     QList<QLabel*> playerTitleList;
     Player* runningPlayer;
+    gameState state;
 
     bool initGameMap();
     bool initGameData();
