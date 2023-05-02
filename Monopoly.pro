@@ -40,7 +40,14 @@ SOURCES += \
     UndefinedMap.cpp \
     Player.cpp \
     land.cpp \
-    prop.cpp
+    prop.cpp \
+    Affect.cpp \
+    Buff.cpp \
+    Debuff.cpp \
+    GameStateController.cpp \
+    GameRoundController.cpp \
+    Controller.cpp \
+    PlayerStateController.cpp
 
 HEADERS += \
         monopolygame.h \
@@ -59,9 +66,17 @@ HEADERS += \
     UndefinedMap.h \
     Player.h \
     land.h \
+    Affect.h \
+    Buff.h \
+    Debuff.h \
+    Controller.h \
+    GameStateController.h \
+    GameRoundController.h \
+    PlayerStateController.h
 
 FORMS += \
-        monopolygame.ui
+        monopolygame.ui \
+    welcome.ui
 
 
 RESOURCES += \

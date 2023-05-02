@@ -50,10 +50,6 @@ monopolyGame::monopolyGame(QWidget *parent) :
         setStyleSheet(qss->readAll());
     }
 
-
-
-    state=gameState::Ready;
-
     initGameData();
     initGameMap();
     initUI();
@@ -72,8 +68,7 @@ monopolyGame::monopolyGame(QWidget *parent) :
     shortcut_D->setObjectName("D");
     connect(shortcut_D, &QShortcut::activated, this, moveCamera);
 
-    state=gameState::Running;
-
+    stateController.setState(gameState::Running);
 }
 
 monopolyGame::~monopolyGame()
@@ -166,30 +161,18 @@ bool monopolyGame::initGameData()
     for(int playerNum = 0; playerNum < PLAYER_NUM;playerNum++)
     {
         playerList.append(new Player(begin));
+
+        //生成头衔
         QLabel *lab = new QLabel();
         lab->setText(playerList.at(playerNum)->name);
+        lab->setGeometry(0,0,50,10);
         playerTitleList.append(lab);
 
-        Money *userMoney;
-        for(int propNum = 0;propNum < playerList[playerNum]->knapsack->container.length();propNum++)
-        {
-            if(playerList[playerNum]->knapsack->container.at(propNum)->inherits("Money"))
-            {
-                userMoney = dynamic_cast<Money*>(playerList[playerNum]->knapsack->container.at(propNum));
-                break;
-            }
-        }
+        Money *userMoney = dynamic_cast<Money*>(playerList[playerNum]->knapsack->getProp("Money"));
 
         //绑定金币改变事件
         connect(userMoney,&Money::moneyChanged,[=](){
-            Money *runningUserMoney;
-            for(int propNum = 0;propNum < runningPlayer->knapsack->container.length();propNum++)
-            {
-                if(runningPlayer->knapsack->container.at(propNum)->inherits("Money"))
-                {
-                    runningUserMoney = dynamic_cast<Money*>(runningPlayer->knapsack->container.at(propNum));
-                }
-            }
+            Money *runningUserMoney = dynamic_cast<Money*>(runningPlayer->knapsack->getProp("Money"));
             ui->gamePannel->findChild<QLabel*>("runningPlayer_moneyLab")->setText("余额：" + QString::number(runningUserMoney->num));
         });
 
@@ -259,14 +242,7 @@ bool monopolyGame::initGameData()
                 msg->show();
 
                 //获取金币指针
-                Money *runningPlayerMoney;
-                for(int j = 0;j < runningPlayer->knapsack->container.length();j++)
-                {
-                    if(runningPlayer->knapsack->container.at(j)->inherits("Money"))
-                    {
-                        runningPlayerMoney = dynamic_cast<Money*>(runningPlayer->knapsack->container.at(j));
-                    }
-                }
+                Money *runningPlayerMoney = dynamic_cast<Money*>(runningPlayer->knapsack->getProp("Money"));
                 runningPlayerMoney->num -= houseList[i]->rent;
                 emit runningPlayerMoney->moneyChanged();
             }
@@ -279,14 +255,7 @@ bool monopolyGame::initGameData()
             QLabel* lab = ui->gamePannel->findChild<QLabel*>("runningPlayerLab");
             lab->setText(runningPlayer->name);
 
-            Money *runningUserMoney;
-            for(int j = 0;j < runningPlayer->knapsack->container.length();j++)
-            {
-                if(runningPlayer->knapsack->container.at(j)->inherits("Money"))
-                {
-                    runningUserMoney = dynamic_cast<Money*>(runningPlayer->knapsack->container.at(j));
-                }
-            }
+            Money *runningUserMoney = dynamic_cast<Money*>(runningPlayer->knapsack->getProp("Money"));
             ui->gamePannel->findChild<QLabel*>("runningPlayer_moneyLab")->setText("余额：" + QString::number(runningUserMoney->num));
         });
     }
@@ -318,36 +287,37 @@ bool monopolyGame::initUI()
     connect(endOfTurn,&QPushButton::clicked,this,&monopolyGame::endOfTurn);
 
 
-    //当前玩家信息标签(groupBox)
+    //当前玩家信息
     QGroupBox *runningPlayerInfo = new QGroupBox(ui->gamePannel);
     runningPlayerInfo->setObjectName("runningPlayerInfo");
     runningPlayerInfo->setGeometry(10,10,300,200);
-
-
     //当前玩家label
     QLabel *runningPlayerLab = new QLabel(runningPlayerInfo);
     runningPlayerLab->setObjectName("runningPlayerLab");
     runningPlayerLab->setText(runningPlayer->name);
     runningPlayerLab->move(0,0);
     runningPlayerLab->show();
-
     //余额label
     QLabel *runningPlayer_moneyLab = new QLabel(runningPlayerInfo);
     runningPlayer_moneyLab->setObjectName("runningPlayer_moneyLab");
-    for(int i = 0;i < runningPlayer->knapsack->container.length();i++)
-    {
-        if(runningPlayer->knapsack->container.at(i)->inherits("Money"))
-        {
-            runningPlayer_moneyLab->setText("余额：" +QString::number(dynamic_cast<Money*>(runningPlayer->knapsack->container.at(i))->num) );
-            break;
-        }
-    }
+    runningPlayer_moneyLab->setText("余额：" +QString::number(dynamic_cast<Money*>(runningPlayer->knapsack->getProp("Money"))->num));
     runningPlayer_moneyLab->move(0,100);
     runningPlayer_moneyLab->show();
 
+    //回合信息标签
+    QLabel* roundLab = new QLabel(ui->gamePannel);
+    roundLab->setObjectName("currentRoundLab");
+    roundLab->setText("第" + QString::number(roundController.getRound()) + "回合");
+    roundLab->setGeometry(ui->gamePannel->width()/2-50,10,100,20);
+    roundLab->show();
+    //绑定刷新信息槽函数
+    connect(&roundController,&GameRoundController::valueChanged,[=](){
+        roundLab->setText("第" + QString::number(roundController.getRound()) + "回合");
+    });
+
     //背包按钮
 
-    //信息按钮
+    //游戏信息按钮
     QPushButton *info = new QPushButton(ui->gamePannel);
     info->setObjectName("infoBtn");
     info->setText("?");
@@ -356,6 +326,7 @@ bool monopolyGame::initUI()
         if(ui->gamePannel->findChild<QGroupBox*>("infoBox"))return;
 
         QGroupBox *infoBox = new QGroupBox(ui->gamePannel);
+        infoBox->setObjectName("infoBox");
         int width = 300,height = 300;
         infoBox->setGeometry(ui->gamePannel->width()/2 - width/2,ui->gamePannel->height()/2 - height/2,width,height);
         infoBox->setObjectName("infoBox");
@@ -412,6 +383,21 @@ bool monopolyGame::printMap()
     return true;
 }
 
+bool monopolyGame::checkState()
+{
+    int failedNum = 0;
+    for(int num = 0; num < playerList.length();num++)
+    {
+        if(playerList[num]->stateController.getState() == playerState::Failed)
+        {
+            failedNum++;
+        }
+    }
+    if(failedNum == PLAYER_NUM-1)
+        stateController.setState(gameState::End);
+    return true;
+}
+
 
 bool monopolyGame::showPlayer()
 {
@@ -443,7 +429,7 @@ bool monopolyGame::showPlayer()
                     QPropertyAnimation* playerTitleAnimation = new QPropertyAnimation(playerTitleList[num],"geometry");
                     playerTitleAnimation->setDuration(800);//动画时间
                     playerTitleAnimation->setStartValue(playerTitleList[num]->geometry());
-                    playerTitleAnimation->setEndValue(QRect(girdJ*36,girdI*51-260,playerTitleList[num]->geometry().width(),playerTitleList[num]->geometry().height()));
+                    playerTitleAnimation->setEndValue(QRect(girdJ*36,girdI*51-21,playerTitleList[num]->geometry().width(),playerTitleList[num]->geometry().height()));
                     playerTitleAnimation->setEasingCurve(QEasingCurve::Linear);
                     playerTitleAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 
@@ -513,6 +499,8 @@ bool monopolyGame::moveCamera()
 
 bool monopolyGame::playerRun()
 {
+    //开始执行时让回合结束按钮关闭，防止出现意外
+    ui->gamePannel->findChild<QPushButton*>("nextPlayer")->setEnabled(false);
 
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
     runningPlayer->steps = qrand()%6+1;
@@ -555,11 +543,12 @@ bool monopolyGame::playerRun()
                 emit runningPlayer->playerRun();
                 timer->stop();
                 delete timer;
+                ui->gamePannel->findChild<QPushButton*>("nextPlayer")->setEnabled(true);
             }
         });
 
     // 设置定时器的时间间隔，控制每一步的延时
-    timer->setInterval(800); // 设置延时为1秒
+    timer->setInterval(800); // 设置延时
     timer->start();
 
     return true;
@@ -568,8 +557,23 @@ bool monopolyGame::playerRun()
 
 bool monopolyGame::endOfTurn()
 {
-    ui->gamePannel->findChild<QPushButton*>("run")->setEnabled(true);
-    runningPlayer = nextPlayer();
-    emit runningPlayer->playerChanged();
+    checkState();
+
+    if(playerList.indexOf(runningPlayer) == PLAYER_NUM-1)
+    {
+        roundController.nextRound();
+    }
+
+    switch (stateController.getState()) {
+    case gameState::Running:
+        ui->gamePannel->findChild<QPushButton*>("run")->setEnabled(true);
+        runningPlayer = nextPlayer();
+        emit runningPlayer->playerChanged();
+        break;
+    case gameState::End:
+        break;
+    case gameState::Ready:
+        break;
+    }
     return true;
 }

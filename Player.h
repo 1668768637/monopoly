@@ -4,6 +4,7 @@
 #include"abstractplayer.h"
 #include "knapsack.h"
 #include "QPoint"
+#include "playerstatecontroller.h"
 
 #define INIT_MONEY 20000
 
@@ -21,6 +22,7 @@ public:
     Knapsack* knapsack;
     QPoint gamemapPos;
     int steps;
+    PlayerStateController stateController;
 signals:
     void playerChanged();
     void playerRun();

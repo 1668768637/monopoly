@@ -105,14 +105,7 @@ bool Land::showBuyHouseUI()
         {
             //能够购买
             //获取金币
-            Money *userMoney;
-            for(int i = 0;i < gameWindow->runningPlayer->knapsack->container.length();i++)
-            {
-                if(gameWindow->runningPlayer->knapsack->container.at(i)->inherits("Money"))
-                {
-                    userMoney = dynamic_cast<Money*>(gameWindow->runningPlayer->knapsack->container.at(i));
-                }
-            }
+            Money *userMoney = dynamic_cast<Money*>(gameWindow->runningPlayer->knapsack->getProp("Money"));
 
             //购买成功
             if(userMoney->num > land->price)

@@ -9,9 +9,10 @@ class AbstractMap:public GameObjcet
     Q_OBJECT
 public:
     friend class MapFactory;
-    AbstractMap();
 
     QPoint gamemapPos;
+protected:
+    AbstractMap();
 signals:
     void clicked();
 private:

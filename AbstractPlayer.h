@@ -7,6 +7,7 @@ class AbstractPlayer:public GameObjcet
 {
     Q_OBJECT
 public:
+protected:
     AbstractPlayer();
 };
 #endif // ABSTRACTPLAYER_H

@@ -2,11 +2,12 @@
 #define MONOPOLYGAME_H
 
 #include <QWidget>
+#include <QPixmap>
 #include "QObject"
 #include "AbstractMap.h"
 #include "player.h"
-#include <QPixmap>
-
+#include "gamestatecontroller.h"
+#include "gameroundcontroller.h"
 
 //元素的像素值
 #define ELEM_W 36
@@ -32,8 +33,6 @@ namespace Ui {
 class monopolyGame;
 }
 
-enum class gameState{Ready=1001,Running,End};
-
 class monopolyGame : public QWidget
 {
     Q_OBJECT
@@ -51,12 +50,23 @@ public:
     QList<Player*> playerList;
     QList<QLabel*> playerTitleList;
     Player* runningPlayer;
-    gameState state;
+    GameStateController stateController;
+    GameRoundController roundController;
 
     bool initGameMap();
     bool initGameData();
     bool initUI();
     bool printMap();
+    bool checkState();
+
+    /**
+     * @brief 找到下一个玩家
+     *
+     * 函数详细描述
+     *
+     *
+     * @return 返回一个玩家的指针
+     */
     Player* nextPlayer();
 
 private:

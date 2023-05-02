@@ -19,6 +19,6 @@ Player::Player(QPoint begin)
     this->setPixmap(QPixmap(":/res/img/people.png"));
     this->steps = 0;
 
-    this->knapsack->container.append(new Money(INIT_MONEY));
+    this->knapsack->addProp(new Money(INIT_MONEY));
 }
 
