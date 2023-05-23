@@ -6,7 +6,7 @@ class Debuff:public Affect
 {
     Q_OBJECT
 public:
-    Debuff();
+    Debuff(int round);
 };
 
 #endif // DEBUFF_H

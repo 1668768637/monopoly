@@ -12,16 +12,16 @@ class Player:public AbstractPlayer
 {
     Q_OBJECT
 private:
+    static int num;
 
 public:
     Player(QPoint begin);
 
-    static int num;
     int id;
     QString name;
-    Knapsack* knapsack;
     QPoint gamemapPos;
     int steps;
+    Knapsack* knapsack;
     PlayerStateController stateController;
 signals:
     void playerChanged();

@@ -17,5 +17,9 @@
         <file>img/begin_right.png</file>
         <file>img/land.png</file>
         <file>qss/monopoly.qss</file>
+        <file>img/knapsack.ico</file>
+        <file>img/sleepCard.png</file>
+        <file>img/shop.png</file>
+        <file>img/blackHole.png</file>
     </qresource>
 </RCC>

@@ -2,7 +2,7 @@
 
 
 
-Road::Road(int type)
+Road::Road(int type,int x,int y):AbstractMap(x,y)
 {
     setObjectName("Road");
     //将自身大小设置为 36x51，与实际图片大小一致

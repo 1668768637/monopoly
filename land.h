@@ -16,7 +16,7 @@ public:
     float price;
 
 private:
-    Land();
+    Land(int x,int y);
 private slots:
     bool showBuyHouseUI();
 signals:

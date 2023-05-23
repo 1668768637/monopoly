@@ -1,5 +1,4 @@
 #include "Player.h"
-#include "knapsack.h"
 #include "AbstractMap.h"
 #include "money.h"
 
@@ -21,4 +20,3 @@ Player::Player(QPoint begin)
 
     this->knapsack->addProp(new Money(INIT_MONEY));
 }
-

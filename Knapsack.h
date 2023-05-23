@@ -1,9 +1,12 @@
 #ifndef KNAPSACK_H
 #define KNAPSACK_H
-#include "Prop.h"
 #include "QObject"
 #include <QList>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 #define KNASPACK_MAXLENGTH 64
+#include "Prop.h"
+class Prop;
 
 
 class Knapsack:public Prop
@@ -12,7 +15,6 @@ class Knapsack:public Prop
 public:
     Knapsack();
     bool addProp(Prop *prop);
-
     /**
      * @brief return the first Prop point in the container
      *
@@ -22,6 +24,9 @@ public:
      * @return  return a point point to the first Prop you want to find
      */
     Prop* getProp(QString className);
+    bool use(Player *targetPlayer,int currentRound);
+    QWidget* getTab();
+    QWidget* getTab(PropType type);
 private:
     static int maxLength;
 

@@ -1,6 +1,6 @@
 #include "Debuff.h"
 
-Debuff::Debuff()
+Debuff::Debuff(int round):Affect(round)
 {
     ;
 }

@@ -15,7 +15,7 @@ public:
     int stepCost;
 
 private:
-    Road(int type);
+    Road(int type,int x,int y);
 
 };
 #endif // ROAD_H

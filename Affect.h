@@ -6,8 +6,9 @@ class Affect:public GameObjcet
 {
     Q_OBJECT
 public:
-
+    int beginRund;
+    const int lastRounds;
 protected:
-    Affect() = default;
+    Affect(int round);
 };
 #endif // AFFECT_H

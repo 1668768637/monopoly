@@ -9,6 +9,7 @@
 #include "gamestatecontroller.h"
 #include "gameroundcontroller.h"
 
+/*
 //元素的像素值
 #define ELEM_W 36
 #define ELEM_H 51
@@ -27,6 +28,7 @@
 
 //游戏人数
 #define PLAYER_NUM 2
+*/
 class Player;
 
 namespace Ui {
@@ -46,13 +48,32 @@ public:
 
     QPoint *camearCenter;
     QList<QList<AbstractMap*>> mapList;
-    AbstractMap* screenList[SCREEN_H_ELEMS][SCREEN_W_ELEMS];
     QList<Player*> playerList;
     QList<QLabel*> playerTitleList;
     Player* runningPlayer;
     GameStateController stateController;
     GameRoundController roundController;
 
+    //元素的像素值
+    int ELEM_W;
+    int ELEM_H;
+
+    //画面大小
+    int SCREEN_W_ELEMS;
+    int SCREEN_H_ELEMS;
+
+    //地图大小
+    int GAMEPANNEL_ROW;
+    int GAMEPANNEL_COL;
+
+    //默认相机中心
+    int CAMERACENTER_X;
+    int CAMERACENTER_Y;
+
+    //游戏人数
+    int PLAYER_NUM;
+
+    bool initSettings();
     bool initGameMap();
     bool initGameData();
     bool initUI();

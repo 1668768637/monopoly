@@ -6,7 +6,7 @@ class Buff:public Affect
 {
     Q_OBJECT
 public:
-    Buff();
+    Buff(int round);
 };
 
 #endif // BUFF_H

@@ -9,7 +9,7 @@ class UndefinedMap:public AbstractMap
 public:
     friend class MapFactory;
 private:
-    UndefinedMap();
+    UndefinedMap(int x,int y);
     bool init();
 };
 #endif // UNDEFINEDMAP_H

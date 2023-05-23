@@ -13,8 +13,10 @@ public:
     Player *owner;
     float rent;
 
+    bool isAroundBlackhole();
+
 private:
-    House();
+    House(Player *owner,int x,int y);
 
 private slots:
     bool showHouseInfo();

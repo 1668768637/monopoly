@@ -6,7 +6,7 @@ class Bank:public OperablePlace
 {
     Q_OBJECT
 public:
-    Bank();
+    Bank(int x,int y);
     bool option();
 };
 #endif // BANK_H

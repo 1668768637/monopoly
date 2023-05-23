@@ -10,7 +10,6 @@ class OperablePlace:public AbstractMap
 {
     Q_OBJECT
 public:
-    OperablePlace();
     monopolyGame *gameWindow;
 
     void mousePressEvent(QMouseEvent* ev)
@@ -29,5 +28,9 @@ public:
     {
         setCursor(QCursor(Qt::ArrowCursor));
     }
+protected:
+    OperablePlace(int x,int y);
+signals:
+    void clicked();
 };
 #endif // OPERABLEPLACE_H

@@ -12,9 +12,7 @@ public:
 
     QPoint gamemapPos;
 protected:
-    AbstractMap();
-signals:
-    void clicked();
+    AbstractMap(int x,int y);
 private:
 };
 #endif // ABSTRACTMAP_H

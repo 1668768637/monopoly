@@ -47,7 +47,11 @@ SOURCES += \
     GameStateController.cpp \
     GameRoundController.cpp \
     Controller.cpp \
-    PlayerStateController.cpp
+    PlayerStateController.cpp \
+    sleepy.cpp \
+    sleepcard.cpp \
+    shop.cpp \
+    blackhole.cpp
 
 HEADERS += \
         monopolygame.h \
@@ -72,7 +76,11 @@ HEADERS += \
     Controller.h \
     GameStateController.h \
     GameRoundController.h \
-    PlayerStateController.h
+    PlayerStateController.h \
+    sleepy.h \
+    sleepycard.h \
+    shop.h \
+    blackhole.h
 
 FORMS += \
         monopolygame.ui \

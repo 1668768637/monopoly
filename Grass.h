@@ -9,6 +9,6 @@ class Grass:public AbstractMap
 public:
     friend class MapFactory;
 private:
-    Grass();
+    Grass(int x,int y);
 };
 #endif // GRASS_H

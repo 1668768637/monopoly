@@ -3,7 +3,6 @@
 #include <QLabel>
 #include <QWidget>
 #include "QObject"
-class monopolyGame;
 
 class GameObjcet:public QLabel
 {

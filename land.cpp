@@ -9,7 +9,7 @@
 #include "house.h"
 
 
-Land::Land()
+Land::Land(int x,int y):OperablePlace(x,y)
 {
     setPixmap(QPixmap(":/res/img/land.png"));
     QObject::connect(this,SIGNAL(clicked()),this,SLOT(showBuyHouseUI()));
@@ -82,6 +82,7 @@ bool Land::showBuyHouseUI()
                 distance = 999;
         }
 
+        //如果距离太远
         if(distance > 1)
         {
             QGroupBox *msg = new QGroupBox(gameWindow->ui->gamePannel);
@@ -108,24 +109,20 @@ bool Land::showBuyHouseUI()
             Money *userMoney = dynamic_cast<Money*>(gameWindow->runningPlayer->knapsack->getProp("Money"));
 
             //购买成功
-            if(userMoney->num > land->price)
+            if(userMoney->getNum() > land->price)
             {
-                userMoney->num -= land->price;
+                userMoney->reduce(land->price);
 
                 emit userMoney->moneyChanged();
 
                 //替换土地为房子
-                AbstractMap *house = MapFactory::createMap(19,senderPos.x(),senderPos.y());
+                AbstractMap *house = MapFactory::createMap(19,senderPos.x(),senderPos.y(),gameWindow->runningPlayer);
                 house->setParent(gameWindow->ui->map);
                 gameWindow->mapList[senderPos.x()].replace(senderPos.y(),house);
                 emit mapChanged();
 
 
-                //设置房子主人
-                dynamic_cast<House*>(house)->owner = gameWindow->runningPlayer;
-                //设置租金
-                dynamic_cast<House*>(house)->rent = land->price;
-
+                //显示购买成功
                 QGroupBox *msg = new QGroupBox(gameWindow->ui->gamePannel);
                 QLabel *successLab = new QLabel(msg);
                 successLab->setText("购买成功");
@@ -138,9 +135,10 @@ bool Land::showBuyHouseUI()
                     delete msg;
                 });
 
-                successLab->move(0,0);
-                btn->move(0,20);
-                msg->move(gameWindow->ui->gamePannel->width()/2 - msg->width()/2,gameWindow->ui->gamePannel->height()/2 - msg->height()/2);
+                successLab->move(40,10);
+                btn->move(30,60);
+                msg->setGeometry(gameWindow->ui->gamePannel->width()/2 - 75,gameWindow->ui->gamePannel->height()/2 - 50,150,100);
+                msg->setStyleSheet("QLabel{font-size:15px;}");
                 msg->show();
             }
             else

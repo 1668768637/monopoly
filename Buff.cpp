@@ -1,6 +1,6 @@
 #include"buff.h"
 
-Buff::Buff():Affect()
+Buff::Buff(int round):Affect(round)
 {
     ;
 }

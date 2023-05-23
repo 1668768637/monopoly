@@ -4,19 +4,23 @@
     background-color:rgba(0,0,0,20%);
 }
 
+
 #runningPlayerInfo QLabel{
     padding-left:5px;
     padding-top :5px;
     font-size:25px;
 }
 
+
 #run{
     font-size:20px;
 }
 
+
 #nextPlayer{
     font-size:20px;
 }
+
 
 #infoBtn{
     margin-top :5px;
@@ -28,19 +32,61 @@
     border: 1px solid #000000;
 }
 
+
 #infoBtn:hover{
     background-color : rgb(0,0,0,30%);
 }
 
-#infoBox QLabel{
-    padding-left :5px;
-    padding-top :5px;
-}
 
 #currentRoundLab{
     font-size : 25px;
 }
 
+
 #infoBox{
     background-color:rgba(255,255,255,60%);
+}
+#infoBox QLabel{
+    padding-left :5px;
+    padding-top :5px;
+}
+
+
+#knapsackBtn{
+    border:none;
+    padding:0px;
+}
+
+
+#knapsackUI{
+    background-color:rgb(255,255,255,100%);
+    border-radius : 5px;
+    border: 1px solid #000000;
+}
+
+
+#knapsackUI_closeBtn{
+    margin-right:20%;
+    margin-top:20%;
+    width : 25px;
+    height :25px;
+    font-size : 20px;
+    border-radius : 12px;
+    background-color : rgb(0,0,0,10%);
+    border: 1px solid #000000;
+}
+#inknapsackUI_closeBtnfoBtn:hover{
+    background-color : rgb(0,0,0,30%);
+}
+
+
+#headBox{
+    border:none;
+}
+#bodyBox{
+    border:none;
+}
+
+Prop{
+    border:2px solid #000000;
 }
