@@ -9,6 +9,7 @@ class Money:public Prop
 public:
     Money(float num = 0.0);
     bool use(Player *targetPlayer,int currentRound);
+    bool showRequestVarUI();
     float getNum();
     bool add(float num);
     bool reduce(float num);

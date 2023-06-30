@@ -9,6 +9,6 @@ public:
     int beginRund;
     const int lastRounds;
 protected:
-    Affect(int round);
+    Affect(int lastRounds);
 };
 #endif // AFFECT_H

@@ -21,5 +21,7 @@
         <file>img/sleepCard.png</file>
         <file>img/shop.png</file>
         <file>img/blackHole.png</file>
+        <file>img/title.png</file>
+        <file>audio/bgm/bgm.mp3</file>
     </qresource>
 </RCC>

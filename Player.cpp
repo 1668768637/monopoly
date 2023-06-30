@@ -5,7 +5,7 @@
 
 int Player::num = 0;
 
-Player::Player(QPoint begin)
+Player::Player(QPoint begin,float money)
 {
     setObjectName("Player");
     //将自身大小设置为 36x51，与实际图片大小一致
@@ -19,4 +19,5 @@ Player::Player(QPoint begin)
     this->steps = 0;
 
     this->knapsack->addProp(new Money(INIT_MONEY));
+    dynamic_cast<Money*>(this->knapsack->getProp("Money"))->setNum(money);
 }

@@ -11,7 +11,6 @@
     font-size:25px;
 }
 
-
 #run{
     font-size:20px;
 }
@@ -28,13 +27,13 @@
     height :25px;
     font-size : 20px;
     border-radius : 12px;
-    background-color : rgb(0,0,0,10%);
+    background-color : rgba(0,0,0,10%);
     border: 1px solid #000000;
 }
 
 
 #infoBtn:hover{
-    background-color : rgb(0,0,0,30%);
+    background-color : rgba(0,0,0,30%);
 }
 
 
@@ -47,8 +46,9 @@
     background-color:rgba(255,255,255,60%);
 }
 #infoBox QLabel{
-    padding-left :5px;
-    padding-top :5px;
+    padding-top:20%;
+    padding-left:30%;
+    font-size : 20px;
 }
 
 
@@ -59,7 +59,7 @@
 
 
 #knapsackUI{
-    background-color:rgb(255,255,255,100%);
+    background-color:rgba(255,255,255,100%);
     border-radius : 5px;
     border: 1px solid #000000;
 }
@@ -72,16 +72,17 @@
     height :25px;
     font-size : 20px;
     border-radius : 12px;
-    background-color : rgb(0,0,0,10%);
+    background-color : rgba(0,0,0,10%);
     border: 1px solid #000000;
 }
 #inknapsackUI_closeBtnfoBtn:hover{
-    background-color : rgb(0,0,0,30%);
+    background-color : rgba(0,0,0,30%);
 }
 
 
 #headBox{
     border:none;
+    background-color:white;
 }
 #bodyBox{
     border:none;
@@ -89,4 +90,24 @@
 
 Prop{
     border:2px solid #000000;
+}
+
+
+
+#shopBuyPannel{
+    background-color:white;
+}
+#shopCloseBtn{
+    border-radius:15px;
+    border:1px solid #000000;
+}
+#shopCloseBtn:hover{
+    background-color:yellow;
+}
+
+#prepareUI{
+    background-color:rgba(255,255,255,100%);
+}
+#mainUI{
+    background-color:rgba(255,255,255,100%);
 }

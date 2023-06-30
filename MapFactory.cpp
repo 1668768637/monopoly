@@ -38,7 +38,7 @@ AbstractMap* MapFactory::createMap(int type,int x,int y,GameObjcet *obj)
     case 19:
         p = new House(dynamic_cast<Player*>(obj),x,y);
         break;
-    //房屋
+    //黑洞
     case 21:
         p = new BlackHole(x,y);
         break;

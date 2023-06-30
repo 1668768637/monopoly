@@ -5,11 +5,16 @@ Money::Money(float num):Prop(PropType::unShow)
     this->num = num;
 }
 
-bool Money::use(Player *targetPlayer,int currentRound)
+bool Money::use(Player *targetPlayer, int currentRound)
 {
     Q_UNUSED(targetPlayer)
     Q_UNUSED(currentRound)
     return true;
+}
+
+bool Money::showRequestVarUI()
+{
+    return true;;
 }
 
 float Money::getNum()

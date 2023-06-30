@@ -13,7 +13,8 @@ public:
     Player *owner;
     float rent;
 
-    bool isAroundBlackhole();
+    bool setRent(float runt);
+    float getRent();
 
 private:
     House(Player *owner,int x,int y);

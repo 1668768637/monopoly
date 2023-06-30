@@ -3,6 +3,8 @@
 #include "GameObject.h"
 #include <QMouseEvent>
 #include "QObject"
+
+
 class Player;
 
 enum class PropType{control=1010,function,unShow,other};
@@ -12,9 +14,10 @@ class Prop:public GameObjcet
     Q_OBJECT
 public:
     PropType type;
-
+    float price;
 
     virtual bool use(Player* targetPlayer,int currentRound) = 0;
+    virtual bool showRequestVarUI() = 0;
 
     void mousePressEvent(QMouseEvent* ev)
     {
@@ -24,7 +27,7 @@ public:
         }
     }
 
-    void enterEvent(QEvent*)
+    void enterEvent(QEnterEvent*)
     {
         setCursor(QCursor(Qt::PointingHandCursor));
     }
@@ -34,6 +37,7 @@ public:
     }
 signals:
     void clicked();
+    void used();
 protected:
     Prop(PropType t);
 };

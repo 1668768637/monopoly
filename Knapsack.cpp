@@ -20,6 +20,12 @@ bool Knapsack::addProp(Prop *prop)
     }
 }
 
+bool Knapsack::removeProp(Prop *prop)
+{
+    container.removeOne(prop);
+    return true;
+}
+
 Prop* Knapsack::getProp(QString className)
 {
     Prop* obj = nullptr;
@@ -34,10 +40,15 @@ Prop* Knapsack::getProp(QString className)
     return obj;
 }
 
-bool Knapsack::use(Player *targetPlayer,int currendRound)
+bool Knapsack::use(Player *targetPlayer, int currendRound)
 {
     Q_UNUSED(targetPlayer)
     Q_UNUSED(currendRound)
+    return true;
+}
+
+bool Knapsack::showRequestVarUI()
+{
     return true;
 }
 

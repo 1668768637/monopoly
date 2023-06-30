@@ -15,6 +15,7 @@ class Knapsack:public Prop
 public:
     Knapsack();
     bool addProp(Prop *prop);
+    bool removeProp(Prop *prop);
     /**
      * @brief return the first Prop point in the container
      *
@@ -25,6 +26,7 @@ public:
      */
     Prop* getProp(QString className);
     bool use(Player *targetPlayer,int currentRound);
+    bool showRequestVarUI();
     QWidget* getTab();
     QWidget* getTab(PropType type);
 private:

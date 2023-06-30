@@ -8,28 +8,11 @@
 #include "player.h"
 #include "gamestatecontroller.h"
 #include "gameroundcontroller.h"
+#include "musicthread.h"
+#include "QRandomGenerator"
 
-/*
-//元素的像素值
-#define ELEM_W 36
-#define ELEM_H 51
-
-//画面大小
-#define SCREEN_W_ELEMS 50
-#define SCREEN_H_ELEMS 20
-
-//地图大小
-#define GAMEPANNEL_ROW 20
-#define GAMEPANNEL_COL 50
-
-//默认相机中心
-#define CAMERACENTER_X GAMEPANNEL_COL/2
-#define CAMERACENTER_Y GAMEPANNEL_ROW/2
-
-//游戏人数
-#define PLAYER_NUM 2
-*/
 class Player;
+class MapFactory;
 
 namespace Ui {
 class monopolyGame;
@@ -55,30 +38,38 @@ public:
     GameRoundController roundController;
 
     //元素的像素值
-    int ELEM_W;
-    int ELEM_H;
-
+    int ElemW;
+    int ElemH;
     //画面大小
-    int SCREEN_W_ELEMS;
-    int SCREEN_H_ELEMS;
-
+    int ScreenWElems;
+    int ScreenHElems;
     //地图大小
-    int GAMEPANNEL_ROW;
-    int GAMEPANNEL_COL;
-
+    int GamepannelRow;
+    int GamepannelCol;
     //默认相机中心
-    int CAMERACENTER_X;
-    int CAMERACENTER_Y;
-
+    int CameracenterX;
+    int CameracenterY;
     //游戏人数
-    int PLAYER_NUM;
+    int PlayerNum;
+    //玩家初始金币数量
+    float initPlayerMoneyNum;
+    //玩家名字列表
+    QVariantList playerNameList;
+    //游戏背景音乐线程
+    MusicThread* musicThread;
 
+    bool showMainUI();
+    bool initMainUI();
+    bool initPerpareUI();
+    bool initGame();
     bool initSettings();
     bool initGameMap();
     bool initGameData();
+    bool checkMapLogic();
     bool initUI();
     bool printMap();
     bool checkState();
+    bool isAroundClass(QPoint mapPoint,QString className);
 
     /**
      * @brief 找到下一个玩家
@@ -93,9 +84,14 @@ public:
 private:
     bool showPlayer();
 
+signals:
+    void beginInit();
+    void initStepAdd();
+
 public slots:
     bool moveCamera();
     bool playerRun();
+    bool playerRun(int step);
     bool endOfTurn();
 };
 

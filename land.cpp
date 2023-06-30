@@ -7,6 +7,7 @@
 #include "money.h"
 #include <QMessageBox>
 #include "house.h"
+#include <QRandomGenerator>
 
 
 Land::Land(int x,int y):OperablePlace(x,y)
@@ -17,13 +18,13 @@ Land::Land(int x,int y):OperablePlace(x,y)
         gameWindow->printMap();
     });
 
-    price = qrand()%(MAX_PRICE - MIN_PRICE) + MIN_PRICE;
+    price = QRandomGenerator::global()->bounded(MIN_PRICE,MAX_PRICE);
 }
 
 bool Land::showBuyHouseUI()
 {
     //防止重复出现，导致游戏逻辑出现问题
-    if(gameWindow->ui->gamePannel->findChild<QGroupBox*>("buyPannel") != nullptr)return false;
+    if(gameWindow->ui->gamePannel->findChild<QGroupBox*>("landBuyPannel") != nullptr)return false;
 
     QPoint senderPos = dynamic_cast<Land*>(sender())->gamemapPos;
     Land *land = dynamic_cast<Land*>(gameWindow->mapList[senderPos.x()][senderPos.y()]);
@@ -31,7 +32,7 @@ bool Land::showBuyHouseUI()
     int buyPannel_width = 300,buyPannel_height = 200;
     QGroupBox *buyPannel = new QGroupBox(gameWindow->ui->gamePannel);
     buyPannel->setGeometry(gameWindow->ui->gamePannel->width()/2-buyPannel_width/2,gameWindow->ui->gamePannel->height()/2-buyPannel_height/2,buyPannel_width,buyPannel_height);
-    buyPannel->setObjectName("buyPannel");
+    buyPannel->setObjectName("landBuyPannel");
 
     QLabel *priceLab = new QLabel(buyPannel);
     priceLab->setText("当前房价：" + QString::number(land->price));
@@ -49,38 +50,20 @@ bool Land::showBuyHouseUI()
     //取消购买
     connect(cancle,&QPushButton::clicked,[=](){
         buyPannel->close();
-        delete confirm;
-        delete cancle;
-        delete priceLab;
         delete buyPannel;
     });
 
     //确认购买
     connect(confirm,&QPushButton::clicked,[=](){
         buyPannel->close();
-        delete confirm;
-        delete cancle;
-        delete priceLab;
         delete buyPannel;
 
 
         //获取距离
-        int distance;
-        Road *road = dynamic_cast<Road*>(gameWindow->mapList[gameWindow->runningPlayer->gamemapPos.x()][gameWindow->runningPlayer->gamemapPos.y()]);
-        if(road->direction == Road::Direct::DOWN || road->direction == Road::Direct::UP)
-        {
-            if(gameWindow->runningPlayer->gamemapPos.x() == senderPos.x())
-                distance = fabs(gameWindow->runningPlayer->gamemapPos.y()-senderPos.y());
-            else
-                distance = 999;
-        }
-        else
-        {
-            if(gameWindow->runningPlayer->gamemapPos.y() == senderPos.y())
-                distance = fabs(gameWindow->runningPlayer->gamemapPos.y()-senderPos.y());
-            else
-                distance = 999;
-        }
+        double distance;
+        QPoint landPos = this->gamemapPos;
+        QPoint playerPos = gameWindow->runningPlayer->gamemapPos;
+        distance = sqrt(pow(landPos.x()-playerPos.x(),2) + pow(landPos.y()-playerPos.y(),2));
 
         //如果距离太远
         if(distance > 1)
@@ -116,8 +99,12 @@ bool Land::showBuyHouseUI()
                 emit userMoney->moneyChanged();
 
                 //替换土地为房子
-                AbstractMap *house = MapFactory::createMap(19,senderPos.x(),senderPos.y(),gameWindow->runningPlayer);
+                House *house = dynamic_cast<House*>(MapFactory::createMap(19,senderPos.x(),senderPos.y(),gameWindow->runningPlayer));
                 house->setParent(gameWindow->ui->map);
+                if(gameWindow->isAroundClass(house->gamemapPos,"Black"))
+                {
+                    house->setRent(house->getRent()/2);
+                }
                 gameWindow->mapList[senderPos.x()].replace(senderPos.y(),house);
                 emit mapChanged();
 
@@ -130,8 +117,6 @@ bool Land::showBuyHouseUI()
                 btn->setText("确定");
                 connect(btn,&QPushButton::clicked,[=](){
                     msg->close();
-                    delete successLab;
-                    delete btn;
                     delete msg;
                 });
 
@@ -151,8 +136,6 @@ bool Land::showBuyHouseUI()
                 btn->setText("确定");
                 connect(btn,&QPushButton::clicked,[=](){
                     msg->close();
-                    delete failLab;
-                    delete btn;
                     delete msg;
                 });
 

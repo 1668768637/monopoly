@@ -28,8 +28,8 @@
   <widget class="QGroupBox" name="gamePannel">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>60</y>
+     <x>350</x>
+     <y>30</y>
      <width>961</width>
      <height>531</height>
     </rect>
@@ -51,6 +51,35 @@
     </property>
    </widget>
   </widget>
+  <widget class="QGroupBox" name="mainUI">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>90</y>
+     <width>291</width>
+     <height>161</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="prepareUI">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>290</y>
+     <width>241</width>
+     <height>231</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+  </widget>
+  <zorder>prepareUI</zorder>
+  <zorder>gamePannel</zorder>
+  <zorder>mainUI</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

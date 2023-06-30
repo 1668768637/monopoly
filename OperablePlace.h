@@ -3,15 +3,11 @@
 #include "AbstractMap.h"
 #include "QObject"
 #include <QMouseEvent>
-#include "monopolygame.h"
-#include "ui_monopolygame.h"
 
 class OperablePlace:public AbstractMap
 {
     Q_OBJECT
 public:
-    monopolyGame *gameWindow;
-
     void mousePressEvent(QMouseEvent* ev)
     {
         if (ev != nullptr && ev->button() == Qt::LeftButton)
@@ -20,13 +16,13 @@ public:
         }
     }
 
-    void enterEvent(QEvent*)
+    void enterEvent(QEnterEvent*)
     {
-        setCursor(QCursor(Qt::PointingHandCursor));
+        setCursor(Qt::PointingHandCursor);
     }
     void leaveEvent(QEvent*)
     {
-        setCursor(QCursor(Qt::ArrowCursor));
+        setCursor(Qt::ArrowCursor);
     }
 protected:
     OperablePlace(int x,int y);

@@ -12,6 +12,7 @@ private:
 public:
     SleepCard();
     bool use(Player *targetPlayer,int currentRound);
+    bool showRequestVarUI();
 };
 
 #endif // SLEEPYCARD_H

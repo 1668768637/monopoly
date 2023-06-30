@@ -1,6 +1,6 @@
 #include "Affect.h"
 
-Affect::Affect(int round):lastRounds(round)
+Affect::Affect(int lastRounds):lastRounds(lastRounds)
 {
 
 }

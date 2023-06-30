@@ -1,6 +1,5 @@
 #ifndef PLAYER_H
 #define PLAYER_H
-#include "Road.h"
 #include"abstractplayer.h"
 #include "knapsack.h"
 #include "QPoint"
@@ -15,7 +14,7 @@ private:
     static int num;
 
 public:
-    Player(QPoint begin);
+    Player(QPoint begin,float money);
 
     int id;
     QString name;

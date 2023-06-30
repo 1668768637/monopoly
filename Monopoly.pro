@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -22,8 +22,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-
 SOURCES += \
+    Goods.cpp \
         main.cpp \
         monopolygame.cpp \
     Money.cpp \
@@ -48,12 +48,15 @@ SOURCES += \
     GameRoundController.cpp \
     Controller.cpp \
     PlayerStateController.cpp \
+    propFactory.cpp \
     sleepy.cpp \
     sleepcard.cpp \
     shop.cpp \
-    blackhole.cpp
+    blackhole.cpp \
+    musicthread.cpp
 
 HEADERS += \
+    Goods.h \
         monopolygame.h \
     AbstractPlayer.h \
     AbstractMap.h \
@@ -77,14 +80,15 @@ HEADERS += \
     GameStateController.h \
     GameRoundController.h \
     PlayerStateController.h \
+    propFactory.h \
     sleepy.h \
     sleepycard.h \
     shop.h \
-    blackhole.h
+    blackhole.h \
+    musicthread.h
 
 FORMS += \
-        monopolygame.ui \
-    welcome.ui
+        monopolygame.ui
 
 
 RESOURCES += \

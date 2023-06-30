@@ -1,6 +1,15 @@
 #include "Road.h"
 
+int Road::getStepCost()
+{
+    return stepCost;
+}
 
+bool Road::setStepCost(int stepCost)
+{
+    this->stepCost = stepCost;
+    return true;
+}
 
 Road::Road(int type,int x,int y):AbstractMap(x,y)
 {

@@ -1,5 +1,6 @@
 #include "monopolygame.h"
 #include <QApplication>
+#include <QLibrary>
 
 int main(int argc, char *argv[])
 {

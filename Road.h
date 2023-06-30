@@ -12,10 +12,13 @@ public:
 
     enum class Direct{LEFT=1004,RIGHT,UP,DOWN};
     Direct direction;
-    int stepCost;
+
+    int getStepCost();
+    bool setStepCost(int stepCost);
 
 private:
     Road(int type,int x,int y);
+    int stepCost;
 
 };
 #endif // ROAD_H
