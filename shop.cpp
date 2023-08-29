@@ -41,18 +41,7 @@ Shop::Shop(int x,int y):OperablePlace(x,y)
 
     if(goodsList.length() == 0)
     {
-        //随机生成各类道具
-        for(int i = 0;i < defaultListLength;i++)
-        {
-            int code = QRandomGenerator::global()->bounded(0,Shop::propCodeList.length());
-            Goods* g = new Goods(PropFactory::createProp(Shop::propCodeList[code]));
-            connect(g,&Goods::boughtGoods,this,[=](){
-                Goods* goods = dynamic_cast<Goods*>(sender());
-                goodsList.removeAt(goodsList.indexOf(goods));
-                refreshShop();
-            });
-            goodsList.append(g);
-        }
+        generateGoods();
     }
 }
 
@@ -86,6 +75,26 @@ QWidget *Shop::getPropUI()
     vl->addLayout(hl);//加上最后一个没有满的
     returnWidget->setLayout(vl);
     return returnWidget;
+}
+
+void Shop::generateGoods()
+{
+    generateGoods(defaultListLength);
+}
+
+void Shop::generateGoods(int nums)
+{
+    for(int i = 0;i < nums;i++)
+    {
+        int code = QRandomGenerator::global()->bounded(0,Shop::propCodeList.length());
+        Goods* g = new Goods(PropFactory::createProp(Shop::propCodeList[code]));
+        connect(g,&Goods::hasBeenBought,this,[=](){
+            Goods* goods = dynamic_cast<Goods*>(sender());
+            goodsList.removeAt(goodsList.indexOf(goods));
+            refreshShop();
+        });
+        goodsList.append(g);
+    }
 }
 
 bool Shop::showShopUI()

@@ -10,6 +10,10 @@
 #include "gameroundcontroller.h"
 #include "musicthread.h"
 #include "QRandomGenerator"
+#include "SocketController.h"
+#include <QTcpSocket>
+#include <QMutex>
+#include <QKeyEvent>
 
 class Player;
 class MapFactory;
@@ -57,6 +61,8 @@ public:
     QVariantList playerNameList;
     //游戏背景音乐线程
     MusicThread* musicThread;
+    //链接服务器线程
+    SocketController* socketController;
 
     bool showMainUI();
     bool initMainUI();
@@ -82,10 +88,17 @@ public:
     Player* nextPlayer();
 
 private:
+    //Rendering Players
     bool showPlayer();
+    bool openKnapsack();
+    bool clickRunButton();
+
+protected:
+    void keyPressEvent(QKeyEvent *event)override;
 
 signals:
-    void beginInit();
+    void beginInit_local();
+    void beginInit_CS();
     void initStepAdd();
 
 public slots:

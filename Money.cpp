@@ -25,12 +25,14 @@ float Money::getNum()
 bool Money::add(float num)
 {
     this->num+=num;
+    emit moneyChanged();
     return true;
 }
 
 bool Money::reduce(float num)
 {
     this->num-=num;
+    emit moneyChanged();
     return true;
 }
 

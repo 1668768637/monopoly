@@ -4,7 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia
+QT       += core gui multimedia network
+
+VERSION = 1.1.0.0
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -23,7 +25,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    GamePushButton.cpp \
     Goods.cpp \
+    SocketController.cpp \
         main.cpp \
         monopolygame.cpp \
     Money.cpp \
@@ -56,7 +60,9 @@ SOURCES += \
     musicthread.cpp
 
 HEADERS += \
+    GamePushButton.h \
     Goods.h \
+    SocketController.h \
         monopolygame.h \
     AbstractPlayer.h \
     AbstractMap.h \

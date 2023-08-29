@@ -18,9 +18,14 @@ private:
     static int defaultListLength;
 
     QWidget* getPropUI();
+    //随机生成道具
+    void generateGoods();
+    //随机生成道具
+    void generateGoods(int nums);
 
 private slots:
     bool showShopUI();
+signals:
 };
 
 #endif // SHOP_H

@@ -4,6 +4,7 @@
 #include "knapsack.h"
 #include "QPoint"
 #include "playerstatecontroller.h"
+#include <Money.h>
 
 #define INIT_MONEY 20000
 

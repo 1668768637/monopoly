@@ -1,6 +1,8 @@
 #include "monopolygame.h"
 #include <QApplication>
 #include <QLibrary>
+#include <QtMultimedia/QAudioOutput>
+
 
 int main(int argc, char *argv[])
 {

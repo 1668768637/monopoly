@@ -40,6 +40,8 @@
 #include <QThread>
 #include <QOverload>
 //#include <QRandomGenerator>
+#include <shop.h>
+#include <GamePushButton.h>
 
 monopolyGame* monopolyGame::myWindow = nullptr;
 
@@ -74,19 +76,6 @@ monopolyGame::monopolyGame(QWidget *parent) :
 
     showMainUI();
 
-    connect(this,&monopolyGame::beginInit,this,[=](){
-        ui->mainUI->hide();
-        ui->prepareUI->show();
-        initGame();
-        stateController.setState(gameState::Running);
-
-        //test area
-        runningPlayer->knapsack->addProp(new SleepCard());
-
-
-        ui->prepareUI->hide();
-        ui->gamePannel->show();
-    });
 
     connect(this,&monopolyGame::initStepAdd,this,[=](){
         QProgressBar *progressBar = ui->prepareUI->findChild<QProgressBar*>("initBar");
@@ -113,15 +102,39 @@ bool monopolyGame::showMainUI()
 
 bool monopolyGame::initMainUI()
 {
-    //开始游戏按钮
-    QPushButton *startGameBtn = new QPushButton(ui->mainUI);
-    startGameBtn->setGeometry(0,0,150,50);
-    startGameBtn->move(ui->mainUI->width()/2-startGameBtn->width()/2,ui->mainUI->height()*0.75);
-    startGameBtn->setText("开始游戏");
-    QObject::connect(startGameBtn,&QPushButton::clicked,[=](){
+    //本地游戏按钮
+    QPushButton *startGameBtn_local = new GamePushButton(ui->mainUI);
+    startGameBtn_local->setGeometry(0,0,150,50);
+    startGameBtn_local->move(ui->mainUI->width()/2-startGameBtn_local->width()/2,ui->mainUI->height()*0.75);
+    startGameBtn_local->setText("本地游戏");
+    QObject::connect(startGameBtn_local,&QPushButton::clicked,[=](){
         ui->mainUI->hide();
-        emit beginInit();
+        ui->prepareUI->show();
+        initGame();
+        stateController.setState(gameState::Running);
+
+        //test area
+        runningPlayer->knapsack->addProp(new SleepCard());
+
+        ui->prepareUI->hide();
+        ui->gamePannel->show();
     });
+
+    //C/S模式按钮游戏按钮
+    QPushButton *startGameBtn_CS = new GamePushButton(ui->mainUI);
+    startGameBtn_CS->setGeometry(0,0,150,50);
+    startGameBtn_CS->move(ui->mainUI->width()/2-startGameBtn_CS->width()/2+50+startGameBtn_CS->width(),ui->mainUI->height()*0.75);
+    startGameBtn_CS->setText("联机游戏");
+    startGameBtn_CS->setEnabled(false);
+    QObject::connect(startGameBtn_CS,&QPushButton::clicked,[=](){
+        ui->mainUI->hide();
+        emit beginInit_CS();
+    });
+    //初始化链接线程
+    this->socketController = new SocketController();
+    socketController->start();
+    QThread::msleep(10);//让本线程暂停使得socketThread能够立即执行
+    socketController->moveToThread(socketController->getRunThread());
 
     //标题图标
     QLabel *title = new QLabel(ui->mainUI);
@@ -131,6 +144,8 @@ bool monopolyGame::initMainUI()
     title->move(ui->mainUI->width()/2-titleImg.width()/2,20);
 
     //游戏设置按钮
+
+
     return true;
 }
 
@@ -213,6 +228,8 @@ bool monopolyGame::initSettings()
     }
 
     settingsFile->close();
+
+    stateController.setState(gameState::Ready);
 
     //默认开启游戏声音
     musicThread = new MusicThread();
@@ -397,7 +414,7 @@ bool monopolyGame::initGameData()
                 int width=200,height=100;
                 msg->setGeometry(ui->gamePannel->width()/2-width/2,ui->gamePannel->height()/2-height/2,width,height);
                 QLabel *lab = new QLabel(msg);
-                QPushButton *confirmBtn = new QPushButton(msg);
+                QPushButton *confirmBtn = new GamePushButton(msg);
 
                 lab->setStyleSheet("font-size:20px;");
 
@@ -450,6 +467,7 @@ bool monopolyGame::checkMapLogic()
         QList<AbstractMap*> list = mapList.at(i);
         for(int j = 0;j < list.length();j++)
         {
+            //黑洞附近消耗步数为2
             if(dynamic_cast<Road*>(list.at(j))!=nullptr && isAroundClass(list.at(j)->gamemapPos,"BlackHole"))
             {
                Road* p = dynamic_cast<Road*>(list.at(j));
@@ -482,7 +500,7 @@ bool monopolyGame::initUI()
 
 
     //走一步按钮
-    QPushButton *run = new QPushButton(ui->gamePannel);
+    QPushButton *run = new GamePushButton(ui->gamePannel);
     run->setObjectName("run");
     run->setText("走一次");
     run->move(ui->gamePannel->width()-250,ui->gamePannel->height()-100);
@@ -490,15 +508,16 @@ bool monopolyGame::initUI()
     connect(run,&QPushButton::clicked,this,QOverload<>::of(&playerRun));
 
     //回合结束按钮
-    QPushButton *endOfTurn = new QPushButton(ui->gamePannel);
+    QPushButton *endOfTurn = new GamePushButton(ui->gamePannel);
     endOfTurn->setObjectName("nextPlayer");
     endOfTurn->setText("回合结束");
     endOfTurn->move(ui->gamePannel->width()-150,ui->gamePannel->height()-100);
+    endOfTurn->setEnabled(false);
     endOfTurn->show();
     connect(endOfTurn,&QPushButton::clicked,this,&monopolyGame::endOfTurn);
 
     //背包按钮
-    QPushButton *knapsackBtn = new QPushButton(ui->gamePannel);
+    QPushButton *knapsackBtn = new GamePushButton(ui->gamePannel);
     QPixmap knapsackIco(":/res/img/knapsack.ico");
     knapsackBtn->setObjectName("knapsackBtn");
     knapsackBtn->setCursor(Qt::PointingHandCursor);
@@ -521,7 +540,7 @@ bool monopolyGame::initUI()
             headBox->setGeometry(0,0,knapsackUI->width(),knapsackUI->height()*0.2);//设置区域大小
             headBox->setObjectName("headBox");
             //关闭按钮
-            QPushButton *knapsackUI_closeBtn = new QPushButton(headBox);
+            QPushButton *knapsackUI_closeBtn = new GamePushButton(headBox);
             knapsackUI_closeBtn->setObjectName("knapsackUI_closeBtn");
             knapsackUI_closeBtn->setCursor(Qt::PointingHandCursor);
             knapsackUI_closeBtn->setText("X");
@@ -603,7 +622,7 @@ bool monopolyGame::initUI()
 
 
     //游戏信息按钮
-    QPushButton *info = new QPushButton(ui->gamePannel);
+    QPushButton *info = new GamePushButton(ui->gamePannel);
     info->setObjectName("infoBtn");
     info->setText("?");
     info->move(ui->gamePannel->width()-60,0);
@@ -621,7 +640,7 @@ bool monopolyGame::initUI()
         infoLab->setText(UIJson["infoLabText"].toString());
         infoLab->setWordWrap(true);
 
-        QPushButton *confirm = new QPushButton(infoBox);
+        QPushButton *confirm = new GamePushButton(infoBox);
         confirm->setText("确认");
         confirm->move(infoBox->width()/2 - confirm->width()/2,infoBox->height() - confirm->height());
         connect(confirm,&QPushButton::clicked,[=](){
@@ -735,8 +754,81 @@ bool monopolyGame::showPlayer()
     return showPlayerFlag;
 }
 
+bool monopolyGame::openKnapsack()
+{
+    QGroupBox* knapsackUI = ui->gamePannel->findChild<QGroupBox*>("knapsackUI");
+    //指针为空，说明内容还没有创建，必须要通过点击背包按钮的方式进行创建内容;或是游戏未开始，需要分别判断
+    if(knapsackUI == nullptr)
+    {
+        if(this->stateController.isRunning())
+        {
+            QPushButton* knapsackBen =  ui->gamePannel->findChild<QPushButton*>("knapsackBtn");
+            knapsackBen->click();
+        }
+    }
+    else
+    {
+        if(knapsackUI->isHidden())
+        {
+            QPushButton* knapsackBen =  ui->gamePannel->findChild<QPushButton*>("knapsackBtn");
+            knapsackBen->click();
+        }
+        else
+        {
+            knapsackUI->hide();
+        }
+    }
+    return true;
+}
+
+bool monopolyGame::clickRunButton()
+{
+    GamePushButton* runBtn = ui->gamePannel->findChild<GamePushButton*>("run");
+    //指针为空，说明游戏还没开始
+    if(runBtn == nullptr)
+    {
+        qDebug()<<"game isn't running!!!";
+    }
+    else
+    {
+        if(runBtn->isEnabled())runBtn->click();
+    }
+    return true;
+}
+
+void monopolyGame::keyPressEvent(QKeyEvent *event)
+{
+    //control组合键模式
+    if(event->modifiers()==Qt::ControlModifier)
+    {
+        event->ignore();
+    }
+    else
+    {
+        //单个按键模式
+        switch(event->key())
+        {
+            //屏蔽tab键、空格键
+        case Qt::Key_Space:
+        case Qt::Key_Tab:
+            break;
+
+            //B键打开背包
+        case Qt::Key_B:
+            openKnapsack();
+            break;
+        case Qt::Key_Enter:
+            clickRunButton();
+            break;
+        default:
+            QWidget::keyPressEvent(event);
+        }
+    }
+}
+
 bool monopolyGame::isAroundClass(QPoint mapPoint,QString className)
 {
+    //附近八个方块的点阵
     QPoint points[8] = {
         QPoint(mapPoint.x()-1,mapPoint.y()-1),
         QPoint(mapPoint.x()-1,mapPoint.y()),
