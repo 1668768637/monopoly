@@ -27,7 +27,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     GamePushButton.cpp \
     Goods.cpp \
-    SocketController.cpp \
+    JsonTool.cpp \
+    SocketThread.cpp \
         main.cpp \
         monopolygame.cpp \
     Money.cpp \
@@ -62,7 +63,8 @@ SOURCES += \
 HEADERS += \
     GamePushButton.h \
     Goods.h \
-    SocketController.h \
+    JsonTool.h \
+    SocketThread.h \
         monopolygame.h \
     AbstractPlayer.h \
     AbstractMap.h \

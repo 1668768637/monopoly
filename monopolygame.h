@@ -10,7 +10,7 @@
 #include "gameroundcontroller.h"
 #include "musicthread.h"
 #include "QRandomGenerator"
-#include "SocketController.h"
+#include "SocketThread.h"
 #include <QTcpSocket>
 #include <QMutex>
 #include <QKeyEvent>
@@ -62,7 +62,7 @@ public:
     //游戏背景音乐线程
     MusicThread* musicThread;
     //链接服务器线程
-    SocketController* socketController;
+    SocketThread* socketThread;
 
     bool showMainUI();
     bool initMainUI();

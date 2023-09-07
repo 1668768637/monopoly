@@ -8,6 +8,5 @@ UndefinedMap::UndefinedMap(int x,int y):AbstractMap(x,y)
 
 bool UndefinedMap::init()
 {
-    this->init();
     return true;
 }

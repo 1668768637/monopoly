@@ -77,6 +77,11 @@ QWidget *Shop::getPropUI()
     return returnWidget;
 }
 
+void Shop::registeProp(int propCode)
+{
+    Shop::propCodeList.append(propCode);
+}
+
 void Shop::generateGoods()
 {
     generateGoods(defaultListLength);
@@ -126,7 +131,7 @@ bool Shop::showShopUI()
             closeBtn->setText("X");
             int closeBtn_width=30,closeBtn_height=30;
             closeBtn->setGeometry(buyPannel->width()-closeBtn_width-20,25,closeBtn_width,closeBtn_height);
-            connect(closeBtn,&QPushButton::clicked,[=](){
+            connect(closeBtn,&QPushButton::clicked,this,[=](){
                 buyPannel->hide();
             });
 
@@ -157,7 +162,7 @@ bool Shop::showShopUI()
         failLab->setText("距离太远,无法购买");
         QPushButton *btn = new QPushButton(msg);
         btn->setText("确定");
-        connect(btn,&QPushButton::clicked,[=](){
+        connect(btn,&QPushButton::clicked,this,[=](){
             msg->close();
             delete failLab;
             delete btn;

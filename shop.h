@@ -2,7 +2,6 @@
 #define SHOP_H
 #include "operableplace.h"
 #include "mapfactory.h"
-#include "Prop.h"
 #include <Goods.h>
 
 class Shop:public OperablePlace
@@ -18,6 +17,15 @@ private:
     static int defaultListLength;
 
     QWidget* getPropUI();
+    /**
+     * @brief registe propcode
+     *
+     *  registe a propcode to shop so that ensure special prop could be construct
+     *
+     * @param propCode  an special code which represent a prop,please ensure the code is available
+     * @return void
+     */
+    void registeProp(int propCode);
     //随机生成道具
     void generateGoods();
     //随机生成道具

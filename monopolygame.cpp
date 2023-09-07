@@ -19,7 +19,7 @@
 #include "road.h"
 #include <QLabel>
 #include "monopolygame.h"
-#include "money.h"
+#include "Money.h"
 #include <QFont>
 #include <QtGlobal>
 #include <QTime>
@@ -131,10 +131,15 @@ bool monopolyGame::initMainUI()
         emit beginInit_CS();
     });
     //初始化链接线程
-    this->socketController = new SocketController();
-    socketController->start();
-    QThread::msleep(10);//让本线程暂停使得socketThread能够立即执行
-    socketController->moveToThread(socketController->getRunThread());
+    this->socketThread = new SocketThread(10000);
+    socketThread->start();
+    socketThread->moveToThread(socketThread->getRunThread());
+    connect(socketThread,&SocketThread::connectSuccessful,this,[=](){
+        startGameBtn_CS->setEnabled(true);
+    });
+    connect(socketThread,&SocketThread::connectBroken,this,[=](){
+        startGameBtn_CS->setEnabled(false);
+    });
 
     //标题图标
     QLabel *title = new QLabel(ui->mainUI);

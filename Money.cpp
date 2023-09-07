@@ -39,6 +39,7 @@ bool Money::reduce(float num)
 bool Money::setNum(float num)
 {
     this->num = num;
+    emit moneyChanged();
     return true;
 }
 
