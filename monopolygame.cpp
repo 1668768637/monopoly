@@ -1,4 +1,5 @@
 #include "monopolygame.h"
+#include "ui_log.h"
 #include "ui_monopolygame.h"
 #include <QLabel>
 #include <QPixmap>
@@ -31,7 +32,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QTabWidget>
-#include "sleepycard.h"
+#include "sleepcard.h"
 #include <QScrollArea>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -39,9 +40,10 @@
 #include <QProgressBar>
 #include <QThread>
 #include <QOverload>
-//#include <QRandomGenerator>
 #include <shop.h>
 #include <GamePushButton.h>
+#include <QUiLoader>
+#include <log.h>
 
 monopolyGame* monopolyGame::myWindow = nullptr;
 
@@ -130,15 +132,21 @@ bool monopolyGame::initMainUI()
         ui->mainUI->hide();
         emit beginInit_CS();
     });
-    //初始化链接线程
-    this->socketThread = new SocketThread(10000);
+
+    //初始化tcp线程
+    this->socketThread = new SocketThread(1000);
     socketThread->start();
-    socketThread->moveToThread(socketThread->getRunThread());
+    connect(socketThread,&SocketThread::RunThread,this,[=](QThread* runThread){
+        socketThread->moveToThread(runThread);
+    });
     connect(socketThread,&SocketThread::connectSuccessful,this,[=](){
         startGameBtn_CS->setEnabled(true);
+        ui->mainUI->findChild<QPushButton*>("logLaunchBtn")->setEnabled(true);
     });
     connect(socketThread,&SocketThread::connectBroken,this,[=](){
         startGameBtn_CS->setEnabled(false);
+        this->findChild<QLabel*>("delayLab")->setText("Null");
+        ui->mainUI->findChild<QPushButton*>("logLaunchBtn")->setEnabled(false);
     });
 
     //标题图标
@@ -150,6 +158,37 @@ bool monopolyGame::initMainUI()
 
     //游戏设置按钮
 
+    //延迟图标
+    QLabel *delayLab = new QLabel(this);
+    delayLab->setGeometry(0,0,50,25);
+    delayLab->setObjectName("delayLab");
+    delayLab->setText("Null");
+    connect(socketThread,&SocketThread::currentDelay,this,[=](int ms){
+        delayLab->setText(QString::number(ms)+"ms");
+    });
+
+
+    //登录按钮弹出按钮
+    //生成登录界面并隐藏
+    class log *logWidget = new class log(ui->mainUI);
+    logWidget->hide();
+    int height = logWidget->height();
+    int width = logWidget->width();
+    int UIheight = ui->mainUI->height();
+    int UIwidth = ui->mainUI->width();
+    logWidget->setGeometry(UIwidth/2-width/2,UIheight/2-height/2,width,height);
+    connect(logWidget,&log::login,this,[=](QJsonObject *request){
+        emit socketThread->sendMessageSignal(request);
+    });
+
+    QPushButton *logLaunchBtn = new QPushButton(ui->mainUI);
+    logLaunchBtn->setObjectName("logLaunchBtn");
+    logLaunchBtn->setText("登录");
+    logLaunchBtn->setGeometry(ui->mainUI->width()-70,0,50,25);
+    logLaunchBtn->setEnabled(false);
+    connect(logLaunchBtn,&QPushButton::clicked,this,[=](){
+        logWidget->show();
+    });
 
     return true;
 }
@@ -187,7 +226,7 @@ bool monopolyGame::initGame()
     if(!initGameMap())return false;
     emit initStepAdd();
     lab->setText("正在初始化游戏UI");
-    if(!initUI())return false;
+    if(!initGameUi())return false;
     emit initStepAdd();
     lab->setText("正在初始化游戏逻辑");
     checkMapLogic();
@@ -449,7 +488,6 @@ bool monopolyGame::initGameData()
 
         //绑定行走玩家发生变化事件
         connect(playerList[num],&Player::playerChanged,[=](){
-
             QLabel* lab = ui->gamePannel->findChild<QLabel*>("runningPlayerLab");
             lab->setText(runningPlayer->name);
 
@@ -457,8 +495,6 @@ bool monopolyGame::initGameData()
             ui->gamePannel->findChild<QLabel*>("runningPlayer_moneyLab")->setText("余额：" + QString::number(runningUserMoney->getNum()));
         });
     }
-
-
 
     runningPlayer = playerList[0];
 
@@ -484,7 +520,7 @@ bool monopolyGame::checkMapLogic()
 }
 
 
-bool monopolyGame::initUI()
+bool monopolyGame::initGameUi()
 {
     //获取UIjson文件
     QFile UIFile("./settings/UI.json");
@@ -699,7 +735,7 @@ bool monopolyGame::printMap()
     return true;
 }
 
-bool monopolyGame::checkState()
+bool monopolyGame::refreshState()
 {
     int bankruptcyNum = 0;
     for(int num = 0; num < playerList.length();num++)
@@ -969,7 +1005,6 @@ bool monopolyGame::playerRun(int step)
             {
              //玩家步数不足以走下一步或者已经走完
                 runningPlayer->steps = 0;
-                emit runningPlayer->playerRun();
                 timer->stop();
                 delete timer;
                 ui->gamePannel->findChild<QPushButton*>("nextPlayer")->setEnabled(true);
@@ -1006,13 +1041,16 @@ bool monopolyGame::playerRun(int step)
         });
     }
 
+    //无论如何，玩家都已经执行完行走逻辑
+    emit runningPlayer->playerRun();
+
     return true;
 }
 
 
 bool monopolyGame::endOfTurn()
 {
-    checkState();
+    refreshState();
     ui->gamePannel->findChild<QPushButton*>("nextPlayer")->setEnabled(false);
 
     //是本回合最后一个玩家行动结束，就进入下一回合

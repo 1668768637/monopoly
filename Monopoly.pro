@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia network
+QT       += core gui multimedia network uitools
 
 VERSION = 1.1.0.0
 
@@ -29,6 +29,7 @@ SOURCES += \
     Goods.cpp \
     JsonTool.cpp \
     SocketThread.cpp \
+    log.cpp \
         main.cpp \
         monopolygame.cpp \
     Money.cpp \
@@ -65,6 +66,7 @@ HEADERS += \
     Goods.h \
     JsonTool.h \
     SocketThread.h \
+    log.h \
         monopolygame.h \
     AbstractPlayer.h \
     AbstractMap.h \
@@ -89,13 +91,14 @@ HEADERS += \
     GameRoundController.h \
     PlayerStateController.h \
     propFactory.h \
+    sleepcard.h \
     sleepy.h \
-    sleepycard.h \
     shop.h \
     blackhole.h \
     musicthread.h
 
 FORMS += \
+        log.ui \
         monopolygame.ui
 
 

@@ -1,4 +1,5 @@
-#include "sleepycard.h"
+#include "sleepcard.h"
+#include "sleepy.h"
 #include "player.h"
 #include <QComboBox>
 #include <QHBoxLayout>
@@ -92,7 +93,6 @@ bool SleepCard::showRequestVarUI()
     {
         ;
     }
-
 
     return true;
 }

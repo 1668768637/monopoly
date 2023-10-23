@@ -64,17 +64,11 @@ public:
     //链接服务器线程
     SocketThread* socketThread;
 
-    bool showMainUI();
-    bool initMainUI();
-    bool initPerpareUI();
     bool initGame();
-    bool initSettings();
-    bool initGameMap();
-    bool initGameData();
-    bool checkMapLogic();
-    bool initUI();
+
     bool printMap();
-    bool checkState();
+    bool refreshState();
+    //判断游戏地图中mapPoint位置的方块周围是否有className类
     bool isAroundClass(QPoint mapPoint,QString className);
 
     /**
@@ -92,6 +86,22 @@ private:
     bool showPlayer();
     bool openKnapsack();
     bool clickRunButton();
+
+    //读取游戏各项设置
+    bool initSettings();
+    bool initSettings(QString settingsPath);
+    //在内存中生成地图
+    bool initGameMap();
+    bool initGameMap(QString mapPath);
+    //生成游戏所需的数据
+    bool initGameData();
+    bool initGameData(QString mapPath);//需要地图文件是为了找到开始时的坐标，等待优化
+    //生成地图之后检查各种方块位置限制和数据调整，保证符合游戏逻辑
+    bool checkMapLogic();
+    bool initGameUi();
+    bool showMainUI();
+    bool initMainUI();
+    bool initPerpareUI();
 
 protected:
     void keyPressEvent(QKeyEvent *event)override;

@@ -1,8 +1,8 @@
-#ifndef SLEEPYCARD_H
-#define SLEEPYCARD_H
+#ifndef SLEEPCARD_H
+#define SLEEPCARD_H
 
-#include "sleepy.h"
 #include "prop.h"
+#include <Affect.h>
 
 class SleepCard:public Prop
 {
@@ -15,4 +15,4 @@ public:
     bool showRequestVarUI();
 };
 
-#endif // SLEEPYCARD_H
+#endif // SLEEPCARD_H

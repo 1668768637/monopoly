@@ -1,6 +1,6 @@
 #include "Knapsack.h"
 #include<QDebug>
-#include <sleepycard.h>
+#include <sleepcard.h>
 
 int Knapsack::maxLength = KNASPACK_MAXLENGTH;
 
