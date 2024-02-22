@@ -73,7 +73,7 @@ QWidget *Knapsack::getTab()
 
 
         Prop* prop = container.at(index);
-        if(prop->type != PropType::unShow)
+        if(prop->getType() != PropType::unShow)
         {
             hl->addWidget(prop);
             propNum++;
@@ -109,7 +109,7 @@ QWidget *Knapsack::getTab(PropType type)
 
         Prop* prop = container.at(index);
 
-        if(prop->type == type)
+        if(prop->getType() == type)
         {
             hl->addWidget(prop);
             propNum++;

@@ -3,7 +3,17 @@
 #include <QGroupBox>
 #include <QPushButton>
 #include "land.h"
-#include "blackhole.h"
+#include <OperablePlace.h>
+
+Player *House::getOwner() const
+{
+    return owner;
+}
+
+void House::setOwner(Player *newOwner)
+{
+    owner = newOwner;
+}
 
 bool House::setRent(float rent)
 {
@@ -11,7 +21,7 @@ bool House::setRent(float rent)
     return true;
 }
 
-float House::getRent()
+float House::getRent() const
 {
     return this->rent;
 }
@@ -22,10 +32,10 @@ House::House(Player *owner,int x,int y):OperablePlace(x,y)
     this->setPixmap(QPixmap(":/res/img/house.png"));
     this->owner = owner;
 
-    float price = dynamic_cast<Land*>(gameWindow->mapList[x][y])->price;
+    const float price = dynamic_cast<Land*>(gameWindow->mapList[x][y])->getPrice();
     this->rent = price;
 
-    connect(this,&House::clicked,this,&showHouseInfo);
+    connect(this,&House::clicked,this,&House::showHouseInfo);
 }
 
 bool House::showHouseInfo()
@@ -34,7 +44,7 @@ bool House::showHouseInfo()
     int houseInfoPannel_width = 300,houseInfoPannel_height = 200;
     houseInfoPannel->setGeometry(gameWindow->ui->gamePannel->width()/2-houseInfoPannel_width/2,gameWindow->ui->gamePannel->height()/2-houseInfoPannel_height/2,houseInfoPannel_width,houseInfoPannel_width);
     QLabel *houseInfo = new QLabel(houseInfoPannel);
-    houseInfo->setText(owner->name + "租金：" + QString::number(rent));
+    houseInfo->setText(owner->getName() + "租金：" + QString::number(rent));
 
     QPushButton *confirm = new QPushButton(houseInfoPannel);
     confirm->setText("确认");

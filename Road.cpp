@@ -84,3 +84,13 @@ Road::Road(int type,int x,int y):AbstractMap(x,y)
         break;
     }
 }
+
+Road::Direct Road::getDirection() const
+{
+    return direction;
+}
+
+void Road::setDirection(Direct newDirection)
+{
+    direction = newDirection;
+}

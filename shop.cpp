@@ -108,7 +108,7 @@ bool Shop::showShopUI()
     QGroupBox* buyPannel = gameWindow->ui->gamePannel->findChild<QGroupBox*>("shopBuyPannel");
 
     QPoint shopPos = dynamic_cast<Shop*>(sender())->gamemapPos;
-    QPoint playerPos = gameWindow->runningPlayer->gamemapPos;
+    QPoint playerPos = gameWindow->runningPlayer->getGamemapPos();
     double distance = sqrt(pow(shopPos.x()-playerPos.x(),2) + pow(shopPos.y()-playerPos.y(),2));
 
     if(distance <= 1.0)

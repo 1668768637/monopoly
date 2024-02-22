@@ -13,9 +13,6 @@ class Prop:public GameObjcet
 {
     Q_OBJECT
 public:
-    PropType type;
-    float price;
-
     virtual bool use(Player* targetPlayer,int currentRound) = 0;
     virtual bool showRequestVarUI() = 0;
 
@@ -35,6 +32,15 @@ public:
     {
         setCursor(QCursor(Qt::ArrowCursor));
     }
+    PropType getType() const;
+    void setType(PropType newType);
+
+    float getPrice() const;
+    void setPrice(float newPrice);
+
+private:
+    PropType type;
+    float price;
 signals:
     void clicked();
     void used();

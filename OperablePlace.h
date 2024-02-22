@@ -24,7 +24,6 @@ public:
     {
         setCursor(Qt::ArrowCursor);
     }
-protected:
     OperablePlace(int x,int y);
 signals:
     void clicked();

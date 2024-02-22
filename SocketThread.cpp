@@ -1,6 +1,7 @@
 #include "SocketThread.h"
 #include <JsonTool.h>
 #include <QDateTime>
+#include <QFile>
 
 QJsonObject* SocketThread::heartPackageJson = []{
     QJsonObject *json = new QJsonObject();
@@ -9,17 +10,10 @@ QJsonObject* SocketThread::heartPackageJson = []{
     return json;
 }();
 
-QHash<QString,int> SocketThread::jsonType = []{
-    QHash<QString,int> hash;
-    //增加通信类型
-    hash.insert("heartPackage",1);
-    hash.insert("login",2);
-    return hash;
-}();
-
-SocketThread::SocketThread(QObject *parent,int HPTInertval)
-    :QThread(parent),socket(nullptr),runThread(nullptr),heartPackageTimer(nullptr),tryConnectTimer(nullptr),heartPackageTimerInterval(HPTInertval)
+SocketThread::SocketThread(monopolyGame *game, int HPTInertval)
+    :QThread(nullptr),socket(nullptr),runThread(nullptr),heartPackageTimer(nullptr),tryConnectTimer(nullptr),heartPackageTimerInterval(HPTInertval)
 {
+    this->game = game;
 }
 
 SocketThread::SocketThread(int HPTInertval):SocketThread(nullptr,HPTInertval)
@@ -92,6 +86,8 @@ void SocketThread::run()
         emit connectBroken();
     });
 
+    //收到新消息
+    QObject::connect(socket,&QTcpSocket::readyRead,this,&SocketThread::receivedNewMsg);
     exec();
 }
 
@@ -101,49 +97,68 @@ void SocketThread::sendMessage(QJsonObject *json)
     emit this->sendMessageSignal(json);
 }
 
-void SocketThread::heartPackageAcrion()
+void SocketThread::setResponseFunction(QString type, void (*func)(monopolyGame *, QJsonObject *))
 {
-
+    this->responseToFunctions.insert(type,func);
 }
-
 
 
 void SocketThread::sendMessageSlot(QJsonObject *msg)
 {
     //附加发送时间
-    msg->insert("date",QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz"));
+    msg->insert("sendDate",QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz"));
+
+    // 在数据前面加入文件大小信息
+    QByteArray msgArray = JsonTool::jsonToString(msg).toStdString().data();
+    QByteArray sizeData;
+    QDataStream sizeStream(&sizeData, QIODevice::WriteOnly);
+    sizeStream << qint64(msgArray.size());
+
     socketMutex.lock();
-    this->socket->write(JsonTool::jsonToString(msg).toStdString().data());
+    this->socket->write(sizeData);
+    this->socket->write(msgArray.data());
+    socket->flush();
     socketMutex.unlock();
 
-    //根据不同的type对回复做出不同的解析
-    //获取回复
-    this->socket->waitForReadyRead();
-    QJsonObject response = JsonTool::stringToJson(this->socket->readAll());
-    if(jsonType.contains(response.value("type").toString()))
-    {
-        switch (jsonType.value(response.value("type").toString()))
-        {
-            //心跳包
-        case 1:
-        {
-            QDateTime sendTime = QDateTime::fromString(msg->value("date").toString(), "yyyy-MM-dd hh:mm:ss.zzz");
-            QDateTime respondTime(QDateTime::fromString(response.value("date").toString(), "yyyy-MM-dd hh:mm:ss.zzz"));
-            int delay = sendTime.msecsTo(respondTime);
-            emit currentDelay(delay);
-            break;
-        }
-            //登录回复
-        case 2:
-        {
-            qDebug()<<response.value("state");
-            break;
-        }
-        }
-    }
-    //释放msg内存
-    if(jsonType.contains(msg->value("type").toString()) != jsonType.value("heartPackage"))
+    //this->socket->waitForReadyRead();
+    //释放除心跳包之外的msg内存
+    if(msg->value("type").toString() != "heartPackage")
     {
         delete msg;
     }
+}
+
+void SocketThread::receivedNewMsg()
+{
+    qint64 msgSize;
+    QDataStream sizeStream(this->socket);
+    sizeStream >> msgSize;
+
+    // 等待消息数据
+    QByteArray msgByteArray;
+    msgSize -= this->socket->bytesAvailable();
+    msgByteArray.append(this->socket->readAll());
+    while (msgSize > 0) {
+        this->socket->waitForReadyRead();
+        msgSize -= this->socket->bytesAvailable();
+        msgByteArray.append(this->socket->readAll());
+    }
+
+    //根据不同的type对回复做出不同的解析
+    //获取回复
+    QJsonObject *response = new QJsonObject(JsonTool::stringToJson(msgByteArray));
+    qDebug()<<*response;
+
+    if(responseToFunctions.contains(response->value("type").toString()))
+    {
+        //找到了相应type的回复
+        void (*function)(monopolyGame*,QJsonObject*) = responseToFunctions.value(response->value("type").toString());
+        //执行相应的处理函数
+        function(game,response);
+    }
+    else
+    {
+        qDebug()<<"未找到对应回复函数";
+    }
+
 }

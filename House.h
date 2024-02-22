@@ -10,13 +10,16 @@ class House:public OperablePlace
     Q_OBJECT
 public:
     friend class MapFactory;
-    Player *owner;
-    float rent;
 
     bool setRent(float runt);
-    float getRent();
+    float getRent() const;
+
+    Player *getOwner() const;
+    void setOwner(Player *newOwner);
 
 private:
+    Player *owner;
+    float rent;
     House(Player *owner,int x,int y);
 
 private slots:

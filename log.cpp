@@ -1,5 +1,4 @@
 #include "log.h"
-#include "qjsonobject.h"
 #include "ui_log.h"
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
@@ -20,8 +19,6 @@ log::log(QWidget *parent) :
     QValidator *validatorID = new QRegularExpressionValidator(regexID, this);
     ui->ID->setValidator(validatorID);
 
-    // 在构造函数中手动连接信号和槽
-//    connect(ui->btnLogin, &QPushButton::clicked, this, &log::on_btnLogin_clicked);
 
 }
 
@@ -35,10 +32,17 @@ void log::on_btnLogin_clicked()
 {
     QString ID = ui->ID->text();
     QString password = ui->password->text();
-    QJsonObject *request = new QJsonObject();
-    request->insert("type","login");
-    request->insert("ID",ID);
-    request->insert("password",password);
-    emit login(request);
+    if(ID.isEmpty() || password.isEmpty())
+    {
+        this->parentWidget()->findChild<QWidget*>("logWidget")->findChild<QLabel*>("logErrorMsgLabel")->setText("用户名或密码为空！！");
+    }
+    else
+    {
+        QJsonObject *request = new QJsonObject();
+        request->insert("type","login");
+        request->insert("ID",ID);
+        request->insert("password",password);
+        emit login(request);
+    }
 }
 

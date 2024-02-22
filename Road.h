@@ -11,14 +11,17 @@ public:
     friend class MapFactory;
 
     enum class Direct{LEFT=1004,RIGHT,UP,DOWN};
-    Direct direction;
 
     int getStepCost();
     bool setStepCost(int stepCost);
 
+    Direct getDirection() const;
+    void setDirection(Direct newDirection);
+
 private:
     Road(int type,int x,int y);
     int stepCost;
+    Direct direction;
 
 };
 #endif // ROAD_H

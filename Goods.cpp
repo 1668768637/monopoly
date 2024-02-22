@@ -14,7 +14,7 @@ Goods::Goods(Prop *p)
 
     this->setStyleSheet("border:2px solid;");
     prop = p;
-    price = p->price;
+    price = p->getPrice();
     QVBoxLayout* layout = new QVBoxLayout();
 
     QHBoxLayout* iconLine = new QHBoxLayout();
@@ -26,9 +26,9 @@ Goods::Goods(Prop *p)
     QPushButton* buyBtn = new QPushButton();
     buyBtn->setText("购买");
     connect(buyBtn,&QPushButton::clicked,this,[=](){
-        gameWindow->runningPlayer->knapsack->addProp(p);
-        Money* money = dynamic_cast<Money*>(gameWindow->runningPlayer->knapsack->getProp("Money"));
-        money->reduce(p->price);
+        gameWindow->runningPlayer->getKnapsack()->addProp(p);
+        Money* money = dynamic_cast<Money*>(gameWindow->runningPlayer->getKnapsack()->getProp("Money"));
+        money->reduce(p->getPrice());
         emit hasBeenBought();
     });
     operationLine->addWidget(buyBtn,Qt::AlignCenter);

@@ -31,7 +31,9 @@ void MusicThread::run()
     QAudioOutput *output = new QAudioOutput();
 
     player->setSource(QUrl("qrc:/res/audio/bgm/bgm.mp3"));
+
     player->setAudioOutput(output);
+    output->setVolume(0.3);
 
     player->play();
 

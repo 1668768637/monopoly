@@ -21,6 +21,16 @@ Land::Land(int x,int y):OperablePlace(x,y)
     price = QRandomGenerator::global()->bounded(MIN_PRICE,MAX_PRICE);
 }
 
+float Land::getPrice() const
+{
+    return price;
+}
+
+void Land::setPrice(float newPrice)
+{
+    price = newPrice;
+}
+
 bool Land::showBuyHouseUI()
 {
     //防止重复出现，导致游戏逻辑出现问题
@@ -62,7 +72,7 @@ bool Land::showBuyHouseUI()
         //获取距离
         double distance;
         QPoint landPos = this->gamemapPos;
-        QPoint playerPos = gameWindow->runningPlayer->gamemapPos;
+        QPoint playerPos = gameWindow->runningPlayer->getGamemapPos();
         distance = sqrt(pow(landPos.x()-playerPos.x(),2) + pow(landPos.y()-playerPos.y(),2));
 
         //如果距离太远
@@ -89,7 +99,7 @@ bool Land::showBuyHouseUI()
         {
             //能够购买
             //获取金币
-            Money *userMoney = dynamic_cast<Money*>(gameWindow->runningPlayer->knapsack->getProp("Money"));
+            Money *userMoney = dynamic_cast<Money*>(gameWindow->runningPlayer->getKnapsack()->getProp("Money"));
 
             //购买成功
             if(userMoney->getNum() > land->price)

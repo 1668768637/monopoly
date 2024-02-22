@@ -55,11 +55,13 @@ SOURCES += \
     Controller.cpp \
     PlayerStateController.cpp \
     propFactory.cpp \
+    responseFunctions.cpp \
     sleepy.cpp \
     sleepcard.cpp \
     shop.cpp \
     blackhole.cpp \
-    musicthread.cpp
+    musicthread.cpp \
+    userinfogroup.cpp
 
 HEADERS += \
     GamePushButton.h \
@@ -91,15 +93,18 @@ HEADERS += \
     GameRoundController.h \
     PlayerStateController.h \
     propFactory.h \
+    responseFunctions.h \
     sleepcard.h \
     sleepy.h \
     shop.h \
     blackhole.h \
-    musicthread.h
+    musicthread.h \
+    userinfogroup.h
 
 FORMS += \
         log.ui \
-        monopolygame.ui
+        monopolygame.ui \
+        userinfogroup.ui
 
 
 RESOURCES += \

@@ -12,7 +12,7 @@ SleepCard::SleepCard():Prop(PropType::control)
     affect = new Sleepy(-1);
     this->setPixmap(QPixmap(":/res/img/sleepCard.png"));
     this->setToolTip("对目标使用，使其两回合无法行动");
-    price = 500;
+    setPrice(500);
 }
 
 bool SleepCard::use(Player *targetPlayer, int currentRound)
@@ -24,7 +24,7 @@ bool SleepCard::use(Player *targetPlayer, int currentRound)
     else
     {
         affect->beginRund = currentRound;
-        targetPlayer->stateController.addAffect(affect);
+        targetPlayer->getStateController()->addAffect(affect);
         return true;
     }
 }
@@ -45,9 +45,9 @@ bool SleepCard::showRequestVarUI()
         QComboBox *playerBox = new QComboBox(requestVar);
         for(int i = 0;i < gameWindow->playerList.length();i++)
         {
-            if(gameWindow->runningPlayer->name != gameWindow->playerList.at(i)->name)
+            if(gameWindow->runningPlayer->getName() != gameWindow->playerList.at(i)->getName())
             {
-                playerBox->addItem(gameWindow->playerList.at(i)->name);
+                playerBox->addItem(gameWindow->playerList.at(i)->getName());
             }
         }
         playerBox->setGeometry(0,0,useWidget->width(),50);
@@ -63,13 +63,13 @@ bool SleepCard::showRequestVarUI()
             Player *targetPlayer;
             for(int i = 0;i < gameWindow->playerList.length();i++)
             {
-                if(gameWindow->playerList.at(i)->name == playerBox->currentText())
+                if(gameWindow->playerList.at(i)->getName() == playerBox->currentText())
                 {
                     targetPlayer = gameWindow->playerList.at(i);
                 }
             }
             use(targetPlayer,gameWindow->roundController.getRound());
-            gameWindow->runningPlayer->knapsack->removeProp(this);
+            gameWindow->runningPlayer->getKnapsack()->removeProp(this);
             emit used();
 
             useWidget->close();
