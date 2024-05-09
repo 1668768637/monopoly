@@ -10,15 +10,13 @@ QJsonObject* SocketThread::heartPackageJson = []{
     return json;
 }();
 
-SocketThread::SocketThread(monopolyGame *game, int HPTInertval)
+SocketThread::SocketThread(monopolyGame *game, QString IP, int HPTInertval)
     :QThread(nullptr),socket(nullptr),runThread(nullptr),heartPackageTimer(nullptr),tryConnectTimer(nullptr),heartPackageTimerInterval(HPTInertval)
 {
     this->game = game;
+    this->IP = IP;
 }
 
-SocketThread::SocketThread(int HPTInertval):SocketThread(nullptr,HPTInertval)
-{
-}
 
 SocketThread::~SocketThread()
 {
@@ -42,14 +40,14 @@ void SocketThread::run()
     QObject::connect(tryConnectTimer,&QTimer::timeout,this,[&](){
         socketMutex.lock();
         socket->abort();
-        socket->connectToHost("127.0.0.1", 8000);
+        socket->connectToHost(IP, 8000);
         socketMutex.unlock();
         qDebug()<<"try connect";
     });
 
     socketMutex.lock();
     this->socket = new QTcpSocket();
-    socket->connectToHost("127.0.0.1", 8000);
+    socket->connectToHost(IP, 8000);
     socketMutex.unlock();
 
 
@@ -102,6 +100,16 @@ void SocketThread::setResponseFunction(QString type, void (*func)(monopolyGame *
     this->responseToFunctions.insert(type,func);
 }
 
+QString SocketThread::getIP() const
+{
+    return IP;
+}
+
+void SocketThread::setIP(const QString &newIP)
+{
+    IP = newIP;
+}
+
 
 void SocketThread::sendMessageSlot(QJsonObject *msg)
 {
@@ -131,8 +139,8 @@ void SocketThread::sendMessageSlot(QJsonObject *msg)
 void SocketThread::receivedNewMsg()
 {
     qint64 msgSize;
-    QDataStream sizeStream(this->socket);
-    sizeStream >> msgSize;
+    QDataStream dataStream(this->socket);
+    dataStream >> msgSize;
 
     // 等待消息数据
     QByteArray msgByteArray;

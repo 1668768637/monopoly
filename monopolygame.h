@@ -38,6 +38,8 @@ public:
     QList<Player*> playerList;
     QList<QLabel*> playerTitleList;
     Player* runningPlayer;
+    Player* myself;
+    QString myID;
     GameStateController stateController;
     GameRoundController roundController;
 
@@ -63,8 +65,12 @@ public:
     MusicThread* musicThread;
     //链接服务器线程
     SocketThread* socketThread;
+    //服务器IP
+    QString serverIP;
+    //游戏联机标志
+    bool isCSGame;
 
-    bool initGame();
+    bool initGame(bool isCSGame);
 
     bool printMap();
     bool refreshState();
@@ -81,7 +87,7 @@ public:
      */
     Player* nextPlayer();
 
-private:
+
     //Rendering Players
     bool showPlayer();
     bool openKnapsack();
@@ -91,11 +97,9 @@ private:
     bool initSettings();
     bool initSettings(QString settingsPath);
     //在内存中生成地图
-    bool initGameMap();
     bool initGameMap(QString mapPath);
     //生成游戏所需的数据
-    bool initGameData();
-    bool initGameData(QString mapPath);//需要地图文件是为了找到开始时的坐标，等待优化
+    bool initGameData(QString mapPath,QString roominfoPath);//需要地图文件是为了找到开始时的坐标，等待优化
     //生成地图之后检查各种方块位置限制和数据调整，保证符合游戏逻辑
     bool checkMapLogic();
     bool initGameUi();
@@ -110,12 +114,14 @@ signals:
     void beginInit_local();
     void beginInit_CS();
     void initStepAdd();
+    void beginGame(bool isCSGame);
 
 public slots:
     bool moveCamera();
     bool playerRun();
     bool playerRun(int step);
     bool endOfTurn();
+    bool startGame(bool isCSGame);
 };
 
 #endif // MONOPOLYGAME_H

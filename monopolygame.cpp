@@ -44,6 +44,7 @@
 #include <GamePushButton.h>
 #include <QUiLoader>
 #include <log.h>
+#include <JsonTool.h>
 
 monopolyGame* monopolyGame::myWindow = nullptr;
 
@@ -76,6 +77,9 @@ monopolyGame::monopolyGame(QWidget *parent) :
     //初始化游戏配置
     if(!initSettings())exit(-1);
 
+    //默认本地游戏
+    this->isCSGame = false;
+
     showMainUI();
 
 
@@ -85,6 +89,10 @@ monopolyGame::monopolyGame(QWidget *parent) :
         if(value+1 <= progressBar->maximum())
             progressBar->setValue(value+1);
     });
+
+    connect(this,&monopolyGame::beginGame,this,[=](bool isCSGame){
+        this->startGame(isCSGame);
+        },Qt::QueuedConnection);
 
 }
 
@@ -110,48 +118,50 @@ bool monopolyGame::initMainUI()
     startGameBtn_local->move(ui->mainUI->width()/2-startGameBtn_local->width()/2-50-startGameBtn_local->width(),ui->mainUI->height()*0.75);
     startGameBtn_local->setText("本地游戏");
     QObject::connect(startGameBtn_local,&QPushButton::clicked,[=](){
-        ui->mainUI->hide();
-        ui->prepareUI->show();
-        initGame();
-        stateController.setState(gameState::Running);
-
-        //test area
-        runningPlayer->getKnapsack()->addProp(new SleepCard());
-
-        ui->prepareUI->hide();
-        ui->gamePannel->show();
+        startGame(false);
     });
 
     //C/S模式按钮游戏按钮
     QPushButton *startGameBtn_CS = new GamePushButton(ui->mainUI);
+    startGameBtn_CS->setObjectName("startGameBtn_CS");
     startGameBtn_CS->setGeometry(0,0,150,50);
     startGameBtn_CS->move(ui->mainUI->width()/2-startGameBtn_CS->width()/2+50+startGameBtn_CS->width(),ui->mainUI->height()*0.75);
     startGameBtn_CS->setText("联机游戏");
     startGameBtn_CS->setEnabled(false);
     QObject::connect(startGameBtn_CS,&QPushButton::clicked,[=](){
-        ui->mainUI->hide();
-
+        startGameBtn_CS->setText("正在匹配");
+        startGameBtn_CS->setEnabled(false);
         QJsonObject *request = new QJsonObject();
         request->insert("type","beginWaiting");
         emit this->socketThread->sendMessageSignal(request);
     });
 
     //初始化tcp线程
-    this->socketThread = new SocketThread(this,1000);
+    this->socketThread = new SocketThread(this,serverIP,1000);
     socketThread->start();
     connect(socketThread,&SocketThread::RunThread,this,[=](QThread* runThread){
         socketThread->moveToThread(runThread);
     });
     connect(socketThread,&SocketThread::connectSuccessful,this,[=](){
-        startGameBtn_CS->setEnabled(true);
+//        startGameBtn_CS->setEnabled(true);socket连接成功并不能立即开始匹配，必须要登陆成功后才可以
         ui->mainUI->findChild<QPushButton*>("logLaunchBtn")->setEnabled(true);
     });
     //断开链接响应
     connect(socketThread,&SocketThread::connectBroken,this,[=](){
+        //关闭联机模式按钮
         startGameBtn_CS->setEnabled(false);
+        startGameBtn_CS->setText("开始匹配");
         this->findChild<QLabel*>("delayLab")->setText("Null");
+        //显示登录按钮
         ui->mainUI->findChild<QPushButton*>("logLaunchBtn")->setEnabled(false);
+        ui->mainUI->findChild<QPushButton*>("logLaunchBtn")->show();
+        //隐藏玩家信息标签
+        ui->mainUI->findChild<QGroupBox*>("userinfoGroup")->hide();
         ui->mainUI->findChild<QWidget*>("logWidget")->hide();
+    });
+    //用户走一步响应
+    connect(socketThread,&SocketThread::playerRun,this,[=](int steps){
+        playerRun(steps);
     });
 
     //标题图标
@@ -225,15 +235,26 @@ bool monopolyGame::initPerpareUI()
     return true;
 }
 
-bool monopolyGame::initGame()
+bool monopolyGame::initGame(bool isCSGame)
 {
+    QString mapFilePath,roominfoFilePath;
+    if(isCSGame)
+    {
+        mapFilePath = "./csFile/map.txt";
+        roominfoFilePath = "./csFile/roominfo.json";
+    }
+    else
+    {
+        mapFilePath = "./localFile/map.txt";
+        roominfoFilePath = "./localFile/roominfo.json";
+    }
     QLabel *lab = ui->prepareUI->findChild<QLabel*>("initLab");
 
     lab->setText("正在初始化游戏数据");
-    if(!initGameData())return false;
+    if(!initGameData(mapFilePath,roominfoFilePath))return false;
     emit initStepAdd();
     lab->setText("正在初始化游戏地图");
-    if(!initGameMap())return false;
+    if(!initGameMap(mapFilePath))return false;
     emit initStepAdd();
     lab->setText("正在初始化游戏UI");
     if(!initGameUi())return false;
@@ -241,6 +262,7 @@ bool monopolyGame::initGame()
     lab->setText("正在初始化游戏逻辑");
     checkMapLogic();
     emit initStepAdd();
+
     return true;
 }
 
@@ -264,22 +286,7 @@ bool monopolyGame::initSettings()
 
 
     //利用json对象初始化游戏数据
-    ElemW = settingsObj["ElemW"].toInt();
-    ElemH = settingsObj["ElemH"].toInt();
-    ScreenWElems = settingsObj["ScreenWElems"].toInt();
-    ScreenHElems = settingsObj["ScreenHElems"].toInt();
-    GamepannelRow = settingsObj["GamepannelRow"].toInt();
-    GamepannelCol = settingsObj["GamepannelCol"].toInt();
-    CameracenterX = settingsObj["CameracenterX"].toInt();
-    CameracenterY = settingsObj["CameracenterY"].toInt();
-    PlayerNum = settingsObj["PlayerNum"].toInt();
-    initPlayerMoneyNum = settingsObj["initPlayerMoneyNum"].toDouble();
-    playerNameList = settingsObj["playerNameList"].toArray().toVariantList();
-    if(playerNameList.count() != PlayerNum)
-    {
-        QMessageBox::information(this,"游戏文件错误","游戏玩家信息不匹配：玩家数量和玩家名字数量不一致\n！");
-        return false;
-    }
+    serverIP = settingsObj["serverIP"].toString();
 
     settingsFile->close();
 
@@ -292,7 +299,7 @@ bool monopolyGame::initSettings()
     return true;
 }
 
-bool monopolyGame::initGameMap()
+bool monopolyGame::initGameMap(QString mapPath)
 {
     //初始化地图数组
     int gameMap[GamepannelRow][GamepannelCol];
@@ -306,7 +313,7 @@ bool monopolyGame::initGameMap()
 
 
     //从map.txt中读取相应的指定地图元素
-    QFile map("./map/map.txt");
+    QFile map(mapPath);
     if (!map.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QMessageBox::information(this,"游戏文件错误","似乎没有找到相应的地图文件。");
@@ -348,8 +355,35 @@ bool monopolyGame::initGameMap()
     return true;
 }
 
-bool monopolyGame::initGameData()
+bool monopolyGame::initGameData(QString mapPath,QString roominfoPath)
 {
+    //读取游戏必要参数
+    QFile roomSetting(roominfoPath);
+    if(!roomSetting.open(QIODevice::ReadOnly|QIODevice::Text))
+    {
+        QMessageBox::information(this,"游戏文件错误","核心配置文件不存在！");
+        return false;
+    }
+    QJsonObject roomSettingJson = JsonTool::stringToJson(roomSetting.readAll());
+    ElemW = roomSettingJson["ElemW"].toInt();
+    ElemH = roomSettingJson["ElemH"].toInt();
+    ScreenWElems = roomSettingJson["ScreenWElems"].toInt();
+    ScreenHElems = roomSettingJson["ScreenHElems"].toInt();
+    GamepannelRow = roomSettingJson["GamepannelRow"].toInt();
+    GamepannelCol = roomSettingJson["GamepannelCol"].toInt();
+    CameracenterX = roomSettingJson["CameracenterX"].toInt();
+    CameracenterY = roomSettingJson["CameracenterY"].toInt();
+    PlayerNum = roomSettingJson["PlayerNum"].toInt();
+    initPlayerMoneyNum = roomSettingJson["initPlayerMoneyNum"].toDouble();
+    playerNameList = roomSettingJson["playerNameList"].toArray().toVariantList();
+
+
+    if(playerNameList.count() != PlayerNum)
+    {
+        QMessageBox::information(this,"游戏文件错误","游戏玩家信息不匹配：玩家数量和玩家名字数量不一致\n！");
+        return false;
+    }
+
     //设置相机中心
     camearCenter = new QPoint(CameracenterX,CameracenterY);
 
@@ -369,7 +403,7 @@ bool monopolyGame::initGameData()
 
     QPoint begin;
 
-    QFile map("./map/map.txt");
+    QFile map(mapPath);
     if (!map.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         return false; // 如果无法打开文件，则退出
@@ -403,6 +437,15 @@ bool monopolyGame::initGameData()
         playerList.append(new Player(begin,initPlayerMoneyNum));
         playerList.at(num)->setName(playerNameList.at(num).toString());
         playerList.at(num)->setParent(ui->gamePannel);
+        if(roomSettingJson.contains("IDList"))
+        {
+            playerList.at(num)->setId(roomSettingJson.value("IDList").toArray().at(num).toString());
+        }
+        //IDList的第一个就是首先行动的玩家
+        if(playerList.at(num)->getId() == myID)
+        {
+            myself = playerList.at(num);
+        }
 
         //生成头衔
         QLabel *lab = new QLabel(ui->gamePannel);
@@ -965,7 +1008,17 @@ bool monopolyGame::moveCamera()
 
 bool monopolyGame::playerRun()
 {
-    playerRun(QRandomGenerator::global()->bounded(1,6));
+    if(isCSGame)
+    {
+        QJsonObject *request = new QJsonObject();
+        request->insert("type","run");
+        request->insert("runPlayerID",runningPlayer->getId());
+        this->socketThread->sendMessage(request);
+    }
+    else
+    {
+        playerRun(QRandomGenerator::global()->bounded(1,6));
+    }
 
     return true;
 }
@@ -1082,5 +1135,21 @@ bool monopolyGame::endOfTurn()
     case gameState::Ready:
         break;
     }
+    return true;
+}
+
+bool monopolyGame::startGame(bool isCSGame)
+{
+    ui->mainUI->hide();
+    ui->prepareUI->show();
+    initGame(isCSGame);
+    stateController.setState(gameState::Running);
+
+    //test area
+    runningPlayer->getKnapsack()->addProp(new SleepCard());
+
+    ui->prepareUI->hide();
+    ui->gamePannel->show();
+
     return true;
 }

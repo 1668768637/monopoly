@@ -24,15 +24,18 @@ class SocketThread : public QThread
     Q_OBJECT
 
 public:
-    explicit SocketThread(monopolyGame *game,int HPTInertval = 1000);
-    explicit SocketThread(int HPTInertval);
+    explicit SocketThread(monopolyGame *game,QString IP,int HPTInertval = 1000);
     ~SocketThread();
     void run() override;
     void sendMessage(QJsonObject *json);
 
     void setResponseFunction(QString type,void (*)(monopolyGame* game,QJsonObject *msg));
 
+    QString getIP() const;
+    void setIP(const QString &newIP);
+
 private:
+    QString IP;
     monopolyGame *game;
     QTcpSocket* socket;
     QMutex socketMutex;
@@ -51,17 +54,17 @@ private slots:
     void sendMessageSlot(QJsonObject *msg);
     void receivedNewMsg();
 signals:
-    //发送数据兵进行解析，向UI线程发出相应的信号
+    //发送数据并进行解析
     void sendMessageSignal(QJsonObject *msg);
+    //向UI线程发出的信号
     void connectSuccessful();
     void connectBroken();
     void RunThread(QThread* thread);
-
-    //向UI线程发出的信号
     void setCurrentDelay(int ms);//最新的延迟
     void logout();
     void SignInSuccess(QString msg);
     void SignInError(QString msg);
+    void playerRun(int steps);
 };
 
 

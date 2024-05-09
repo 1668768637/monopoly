@@ -7,8 +7,9 @@ QJsonObject JsonTool::stringToJson(const QString &jsonString)
     QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonString.toUtf8(), &parseError);
 
     if (parseError.error != QJsonParseError::NoError || !jsonDoc.isObject()) {
-        // 如果解析失败或结果不是一个对象，返回一个空的QJsonObject
-        return QJsonObject();
+        // 如果解析失败或结果不是一个对象，返回一个带错误信息的QJsonObject
+        QJsonObject error;
+        error.insert("error",parseError.errorString());
     }
 
     // 返回解析后的QJsonObject

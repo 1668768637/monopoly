@@ -13,7 +13,7 @@ class Player:public AbstractPlayer
     Q_OBJECT
 private:
     static int num;
-    int id;
+    QString id;
     QString name;
     QPoint gamemapPos;
     int steps;
@@ -23,8 +23,8 @@ private:
 public:
     Player(QPoint begin,float money);
 
-    int getId() const;
-    void setId(int newId);
+    QString getId() const;
+    void setId(QString newId);
 
     QString getName() const;
     void setName(const QString &newName);
