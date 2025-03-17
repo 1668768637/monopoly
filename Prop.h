@@ -16,22 +16,11 @@ public:
     virtual bool use(Player* targetPlayer,int currentRound) = 0;
     virtual bool showRequestVarUI() = 0;
 
-    void mousePressEvent(QMouseEvent* ev)
-    {
-        if (ev != nullptr && ev->button() == Qt::LeftButton)
-        {
-            emit clicked();    //emit signal
-        }
-    }
+    void mousePressEvent(QMouseEvent* ev);
 
-    void enterEvent(QEnterEvent*)
-    {
-        setCursor(QCursor(Qt::PointingHandCursor));
-    }
-    void leaveEvent(QEvent*)
-    {
-        setCursor(QCursor(Qt::ArrowCursor));
-    }
+    void enterEvent(QEnterEvent*);
+
+    void leaveEvent(QEvent*);
     PropType getType() const;
     void setType(PropType newType);
 

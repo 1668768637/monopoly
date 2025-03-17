@@ -8,23 +8,11 @@ class OperablePlace:public AbstractMap
 {
     Q_OBJECT
 public:
-    void mousePressEvent(QMouseEvent* ev)
-    {
-        if (ev != nullptr && ev->button() == Qt::LeftButton)
-        {
-            emit clicked();    //emit signal
-        }
-    }
-
-    void enterEvent(QEnterEvent*)
-    {
-        setCursor(Qt::PointingHandCursor);
-    }
-    void leaveEvent(QEvent*)
-    {
-        setCursor(Qt::ArrowCursor);
-    }
     OperablePlace(int x,int y);
+
+    void mousePressEvent(QMouseEvent* ev);
+    void enterEvent(QEnterEvent*);
+    void leaveEvent(QEvent*);
 signals:
     void clicked();
 };

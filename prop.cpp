@@ -29,6 +29,25 @@ Prop::Prop(PropType t):type(t),price(0.0)
 
     connect(this,&Prop::clicked,this,showRequestVarUI);
     connect(this,&Prop::used,this,[=](){
-            gameWindow->ui->gamePannel->findChild<QGroupBox*>("knapsackUI")->findChild<QGroupBox*>("bodyBox")->findChild<QScrollArea*>("propList")->setWidget(gameWindow->runningPlayer->getKnapsack()->getTab());
+        //用完后刷新背包界面
+        gameWindow->ui->gamePannel->findChild<QGroupBox*>("knapsackUI")->findChild<QGroupBox*>("bodyBox")->findChild<QScrollArea*>("propList")->setWidget(gameWindow->runningPlayer->getKnapsack()->getTab());
     });
+}
+
+void Prop::mousePressEvent(QMouseEvent *ev)
+{
+    if (ev != nullptr && ev->button() == Qt::LeftButton)
+    {
+        emit clicked();    //emit signal
+    }
+}
+
+void Prop::enterEvent(QEnterEvent *)
+{
+    setCursor(QCursor(Qt::PointingHandCursor));
+}
+
+void Prop::leaveEvent(QEvent *)
+{
+    setCursor(QCursor(Qt::ArrowCursor));
 }

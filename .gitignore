@@ -1,0 +1,5 @@
+build/Desktop_Qt_6_5_3_MinGW_64_bit-Release/*
+!build/Desktop_Qt_6_5_3_MinGW_64_bit-Release/csFile/
+!build/Desktop_Qt_6_5_3_MinGW_64_bit-Release/localFile/
+!build/Desktop_Qt_6_5_3_MinGW_64_bit-Release/settings/
+build/Desktop_Qt_6_5_3_MinGW_64_bit-Debug/

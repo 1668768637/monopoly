@@ -1,0 +1,13 @@
+{
+    "ElemW":36,
+    "ElemH":51,
+    "ScreenWElems":50,
+    "ScreenHElems":20,
+    "GamepannelRow":20,
+    "GamepannelCol":50,
+    "CameracenterY":10,
+    "CameracenterX":25,
+    "PlayerNum":3,
+    "initPlayerMoneyNum":2000,
+    "playerNameList":["Player1","Player2","Player3"]
+}

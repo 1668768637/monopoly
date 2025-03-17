@@ -138,7 +138,8 @@ bool monopolyGame::initMainUI()
 
     //初始化tcp线程
     this->socketThread = new SocketThread(this,serverIP,1000);
-    socketThread->start();
+    //暂时关闭socket功能，暂停网络开发
+    //socketThread->start();
     connect(socketThread,&SocketThread::RunThread,this,[=](QThread* runThread){
         socketThread->moveToThread(runThread);
     });
@@ -321,7 +322,6 @@ bool monopolyGame::initGameMap(QString mapPath)
         return false; // 如果无法打开文件，则退出
     }
 
-
     //更新地图数组
     QTextStream ins(&map);
     while(!ins.atEnd())
@@ -361,7 +361,7 @@ bool monopolyGame::initGameData(QString mapPath,QString roominfoPath)
     QFile roomSetting(roominfoPath);
     if(!roomSetting.open(QIODevice::ReadOnly|QIODevice::Text))
     {
-        QMessageBox::information(this,"游戏文件错误","核心配置文件不存在！");
+        QMessageBox::information(this,"游戏文件错误","房间配置文件不存在！");
         return false;
     }
     QJsonObject roomSettingJson = JsonTool::stringToJson(roomSetting.readAll());
@@ -411,7 +411,7 @@ bool monopolyGame::initGameData(QString mapPath,QString roominfoPath)
     QTextStream ins(&map);
     if(ins.atEnd())
     {
-        QMessageBox::information(this,"游戏文件无效","初始化游戏数据时遇到了无效数据");
+        QMessageBox::information(this,"游戏文件无效","初始化游戏地图时遇到了无效数据");
         exit(-1);
     }
     else
@@ -430,6 +430,8 @@ bool monopolyGame::initGameData(QString mapPath,QString roominfoPath)
             exit(-1);
         }
     }
+
+    map.close();
 
     //生成玩家
     for(int num = 0; num < PlayerNum;num++)
@@ -935,6 +937,7 @@ bool monopolyGame::isAroundClass(QPoint mapPoint,QString className)
         };
     for(int i = 0;i < 8;i++)
     {
+        if(points[i].x()<0 && points[i].y()<0) return false;
         if(mapList[points[i].x()][points[i].y()]->inherits(className.toLatin1().data()))
         {
             return true;
